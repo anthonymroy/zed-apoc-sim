@@ -25,5 +25,5 @@ venv.bak/
 # Video files
 *.gif
 
-# Personal Scratch Files
-*scratch.txt # Useful for common console commands
+# Personal Scratch File
+scratch.txt

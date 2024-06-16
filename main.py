@@ -28,7 +28,7 @@ if __name__ == "__main__":
     data_df = simulate.initialize(shape_gdf, border_df, population_df)    
     time_data = simulate.run(data_df)    
     plot_data = generate_plot_data(time_data, shape_gdf)
-    ani.make_image(plot_data,2)
+    # ani.make_image(plot_data,500)
     mov = ani.make_animation(plot_data, config.FPS, config.ANIMATION_DURATION)
     ani.save_animation(mov, config.VIDEO_FILENAME, config.FPS)
 

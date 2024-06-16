@@ -60,7 +60,7 @@ def calculate_migration(src_df:pd.DataFrame) -> pd.Series:
             fraction = neighbor["fraction"]
             rate_n = my_porosity * fraction / my_compactness
             total += rate_n * (conc_n - my_conc) * my_area
-        ret_df.at[my_name,"migration"] = total
+        ret_df.at[my_name,"migration"] = int(total)
     return ret_df["migration"]
 
 def calculate_derived_values(src_df:pd.DataFrame) -> pd.DataFrame:    
