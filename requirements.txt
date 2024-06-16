@@ -1,0 +1,5 @@
+matplotlib #matplotlib might have to be at the top of the list to get the bug-free version
+census
+geopandas
+pandas
+pygris
