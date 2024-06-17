@@ -32,7 +32,7 @@ def set_initial_conditions(src_df:pd.DataFrame, p_df:pd.DataFrame) -> pd.DataFra
      ret_df["escape_chance_h"] = config.INITIAL_ESCAPE_CHANCE_H
      ret_df["escape_chance_z"] = config.INITIAL_ESCAPE_CHANGE_Z
      ret_df["border_porosity_z"] = config.BORDER_POROSITY
-     ret_df.fillna(0, inplace=True)
+     ret_df.fillna(0.0, inplace=True)
      #ZOMBIE ATTACK!     
      ret_df.at["Pennsylvania", "population_z"] = round(0.01*ret_df.at["Pennsylvania", "population_h"])
      return ret_df
@@ -92,7 +92,7 @@ def time_step(src_df:pd.DataFrame) -> pd.DataFrame:
     ret_df = calculate_derived_values(ret_df)
     return ret_df
 
-def run(initial_df:pd.DataFrame) -> pd.DataFrame:
+def run(initial_df:pd.DataFrame) -> list[pd.DataFrame]:
     df_0 = initial_df.copy()
     data = [df_0]
     for i in range(config.DAYS_TO_SIMULATE): 

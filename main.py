@@ -1,35 +1,42 @@
-import animation as ani
+import argparse
 import config
-from geopandas import GeoDataFrame
-import simulate
-from pandas import DataFrame
+import errno
+import os
+import pickle
 import setup
+import simulate
+import visualization as viz
 
 MODE = "state"
 
-def generate_plot_data(src_data_list:list[DataFrame], gdf:GeoDataFrame):
-    data = []
-    for step in range(len(src_data_list)):
-        pop_h = src_data_list[step]["population_h"]
-        pop_z = src_data_list[step]["population_z"]
-        datum = pop_h / (pop_h + pop_z)
-        datum.name = step
-        data.append(datum)
-    data_df = DataFrame(data).T
-    ret_df = GeoDataFrame(        
-        data = data_df,
-        geometry = gdf.geometry,
-        crs = gdf.crs
-    )
-    return ret_df
+def parse_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()    
+    parser.add_argument("--sim", dest="sim_only", action="store_true", default=False,
+                           help="Flag to run only the simulation without visualization")
+    parser.add_argument("--viz", dest="viz_only", action="store_true", default=False,
+                           help="Flag to visualize the last simulation without rerunning it")
+    return parser.parse_args()    
 
 if __name__ == "__main__":
-    shape_gdf, border_df, population_df = setup.main(MODE)  
-    data_df = simulate.initialize(shape_gdf, border_df, population_df)    
-    time_data = simulate.run(data_df)    
-    plot_data = generate_plot_data(time_data, shape_gdf)
-    # ani.make_image(plot_data,500)
-    mov = ani.make_animation(plot_data, config.FPS, config.ANIMATION_DURATION)
-    ani.save_animation(mov, config.VIDEO_FILENAME, config.FPS)
+    my_args = parse_arguments()
+    
+    shape_gdf, border_df, population_df = setup.main(MODE) 
+    my_args.viz_only = True
+    if my_args.viz_only:
+        if not os.path.exists(config.LAST_SIMULATION_FILENAME):
+            e = FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), config.LAST_SIMULATION_FILENAME)
+            e.strerror += ". Run the simulation locally to create it" #Add remedy to error message
+            raise e
+        time_data = pickle.load(open(config.LAST_SIMULATION_FILENAME, "rb"))
+    else: 
+        data_df = simulate.initialize(shape_gdf, border_df, population_df)    
+        time_data = simulate.run(data_df)        
+        pickle.dump(time_data, open(config.LAST_SIMULATION_FILENAME, 'wb'))
 
- 
+    if not my_args.sim_only:    
+        plot_data = viz.generate_plot_data(time_data, shape_gdf)
+        # ani.make_image(plot_data,500)
+        mov = viz.make_animation(plot_data, config.FPS, config.ANIMATION_DURATION)
+        viz.save_animation(mov, config.VIDEO_FILENAME, config.FPS)
+
+    print("Zombie Apocalypse Simulation complete")

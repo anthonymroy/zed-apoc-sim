@@ -10,3 +10,10 @@ Hobby project of simulating a zombie apocalypse in the United States
 
 `python .\main.py`
 
+### Runtime options
+<pre>
+options:
+  -h, --help  show this help message and exit
+  --sim       Flag to run only the simulation without visualization
+  --viz       Flag to visualize the last simulation without rerunning it
+  </pre>
