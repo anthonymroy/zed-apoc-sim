@@ -27,4 +27,4 @@
 - Add variable time step
 - Add fight vs flight humans
 - Add tests
-- Include instructions on how to use runtime arguements
+- Include instructions on how to use runtime arguements [DONE]
