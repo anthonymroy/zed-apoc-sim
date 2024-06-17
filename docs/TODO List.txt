@@ -1,11 +1,12 @@
-- Add UI
 - Add arguments [DONE]
 - Save simulations [DONE]
 - Seperate sim and animation [DONE]
+- Make main.py the only file to directly reference non-pathfile conf variables.
 - Implement counties for a single state
 - Add human learning
 - Add zombie decay
 - Add human migration
+- Add UI
 - Add migration options
 - Add zombie learning
 - Add carriers / incubation period
