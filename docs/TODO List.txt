@@ -22,3 +22,4 @@
 - Adjust migration to be dependent on movement speed
 - Add variable time step
 - Add fight vs flight humans
+- Add tests
