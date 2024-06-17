@@ -1,5 +1,8 @@
 - Add UI
-- Implement counties for any state (or two)
+- Add arguments [DONE]
+- Save simulations [DONE]
+- Seperate sim and animation [DONE]
+- Implement counties for a single state
 - Add human learning
 - Add zombie decay
 - Add human migration
@@ -23,3 +26,4 @@
 - Add variable time step
 - Add fight vs flight humans
 - Add tests
+- Include instructions on how to use runtime arguements

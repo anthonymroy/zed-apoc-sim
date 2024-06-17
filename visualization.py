@@ -3,9 +3,25 @@ from geopandas import GeoDataFrame
 import math
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
-from matplotlib.colors import Normalize
+from pandas import DataFrame
 
 TIME_PROGRESSION_ERROR_MESSAGE = "TIME_PROGRESSION must be 'lin' or 'log'"
+
+def generate_plot_data(src_data_list:list[DataFrame], gdf:GeoDataFrame):
+    data = []
+    for step in range(len(src_data_list)):
+        pop_h = src_data_list[step]["population_h"]
+        pop_z = src_data_list[step]["population_z"]
+        datum = pop_h / (pop_h + pop_z)
+        datum.name = step
+        data.append(datum)
+    data_df = DataFrame(data).T
+    ret_df = GeoDataFrame(        
+        data = data_df,
+        geometry = gdf.geometry,
+        crs = gdf.crs
+    )
+    return ret_df
 
 def calculate_key_frames_linear(data_length:int, number_of_frames:int) -> list[int]:
     '''
