@@ -10,8 +10,15 @@ Hobby project of simulating a zombie apocalypse in the United States
 
 `python .\main.py`
 
-### Runtime options
+### Runtime instructions
 <pre>
+usage: main.py [-h] [--sim] [--viz] region
+
+Simulate a zombie outbreak
+
+positional arguments:
+  region      The two-letter region to simulate. 'US' is the default value
+
 options:
   -h, --help  show this help message and exit
   --sim       Flag to run only the simulation without visualization
