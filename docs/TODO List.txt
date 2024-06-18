@@ -28,3 +28,5 @@
 - Add fight vs flight humans
 - Add tests
 - Include instructions on how to use runtime arguements [DONE]
+- Allow a random initial outbreak
+- Make schema for datatypes

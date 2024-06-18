@@ -7,7 +7,7 @@ import setup
 import simulate
 import visualization as viz
 
-MODE = "state"
+MODE = "OH"
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser()    
@@ -20,8 +20,8 @@ def parse_arguments() -> argparse.Namespace:
 if __name__ == "__main__":
     my_args = parse_arguments()
     
-    shape_gdf, border_df, population_df = setup.main(MODE) 
-    my_args.viz_only = True
+    shape_gdf, border_df, population_df = setup.main(MODE.upper()) 
+    
     if my_args.viz_only:
         if not os.path.exists(config.LAST_SIMULATION_FILENAME):
             e = FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), config.LAST_SIMULATION_FILENAME)

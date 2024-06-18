@@ -2,4 +2,5 @@ matplotlib #matplotlib might have to be at the top of the list to get the bug-fr
 census
 geopandas
 pandas
+py-linq
 pygris

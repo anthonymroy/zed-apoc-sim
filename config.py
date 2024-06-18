@@ -19,7 +19,10 @@ STATE_SHAPE_FILENAME = os.path.join(SHAPE_DIRECTORY,"states.shp")
 STATE_BORDERS_FILENAME = os.path.join(DATA_DIRECTORY,"state_borders.json")
 STATE_POPULATIONS_FILENAME = os.path.join(DATA_DIRECTORY,"state_populations.csv")
 COUNTY_SHAPE_FILENAME = os.path.join(SHAPE_DIRECTORY,"counties.shp")
-COUNTY_BORDERS_FILENAME = os.path.join(DATA_DIRECTORY,"county_borders.json")
+
+BASE_BORDERS_FILENAME = "_borders.shp"
+BASE_NEIGHBORS_FILENAME = "_neighbors.json"
+
 COUNTY_POPULATIONS_FILENAME = os.path.join(DATA_DIRECTORY,"county_populations.csv")
 
 LAST_SIMULATION_FILENAME = "last_simulation.sim"

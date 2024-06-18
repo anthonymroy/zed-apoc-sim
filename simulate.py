@@ -27,15 +27,15 @@ def set_features(index:list) -> pd.DataFrame:
     return df
 
 def set_initial_conditions(src_df:pd.DataFrame, p_df:pd.DataFrame) -> pd.DataFrame:
-     ret_df = src_df.copy()
-     ret_df["population_h"] = p_df["POP"]
-     ret_df["escape_chance_h"] = config.INITIAL_ESCAPE_CHANCE_H
-     ret_df["escape_chance_z"] = config.INITIAL_ESCAPE_CHANGE_Z
-     ret_df["border_porosity_z"] = config.BORDER_POROSITY
-     ret_df.fillna(0.0, inplace=True)
-     #ZOMBIE ATTACK!     
-     ret_df.at["Pennsylvania", "population_z"] = round(0.01*ret_df.at["Pennsylvania", "population_h"])
-     return ret_df
+    ret_df = src_df.copy()
+    ret_df["population_h"] = p_df["POP"]
+    ret_df["escape_chance_h"] = config.INITIAL_ESCAPE_CHANCE_H
+    ret_df["escape_chance_z"] = config.INITIAL_ESCAPE_CHANGE_Z
+    ret_df["border_porosity_z"] = config.BORDER_POROSITY
+    ret_df.fillna(0.0, inplace=True)
+    #ZOMBIE ATTACK!     
+    ret_df.at["Hamilton", "population_z"] = round(0.01*ret_df.at["Hamilton", "population_h"])
+    return ret_df
 
 def calculate_static_values(src_df:pd.DataFrame, gdf:gpd.GeoDataFrame, b_df:pd.DataFrame) -> pd.DataFrame:
     ret_df = src_df.copy()
@@ -68,7 +68,9 @@ def calculate_derived_values(src_df:pd.DataFrame) -> pd.DataFrame:
     ret_df["population_density_h"] = ret_df["population_h"] / ret_df["area"]
     ret_df["population_density_z"] = ret_df["population_z"] / ret_df["area"]
     ret_df["encounter_chance_h"] = ret_df["population_z"] / (ret_df["population_h"] + ret_df["population_z"])
+    ret_df["encounter_chance_h"].fillna(0.0, inplace=True) #Fix for if total population is 0
     ret_df["encounter_chance_z"] = ret_df["population_h"] / (ret_df["population_h"] + ret_df["population_z"])
+    ret_df["encounter_chance_z"].fillna(0.0, inplace=True) #Fix for if total population is 0
     ret_df["bit_h"] = (ret_df["population_h"] * ret_df["encounter_chance_h"] * (1 - ret_df["escape_chance_h"])).apply(np.ceil)
     ret_df["bit_h"] = ret_df["bit_h"].apply(max, args=(0,))
     ret_df["killed_z"] = (ret_df["population_z"] * ret_df["encounter_chance_z"] * (1 - ret_df["escape_chance_z"])).apply(np.ceil)
@@ -105,5 +107,7 @@ def run(initial_df:pd.DataFrame) -> list[pd.DataFrame]:
 
 if __name__ == "__main__":
     import setup
-    shape_gdf, border_df, population_df = setup.main("state")
+    region = "OH"
+    shape_gdf, border_df, population_df = setup.main(region)
     initial_df = initialize(shape_gdf, border_df, population_df)
+    print(initial_df.loc[initial_df.index[0]])
