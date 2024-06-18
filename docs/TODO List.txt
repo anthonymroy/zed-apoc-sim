@@ -7,6 +7,7 @@
 - Add zombie decay
 - Add human migration
 - Add UI
+- Plot total populations
 - Add migration options
 - Add zombie learning
 - Add carriers / incubation period
@@ -28,6 +29,6 @@
 - Add fight vs flight humans
 - Add tests
 - Include instructions on how to use runtime arguements [DONE]
-- Allow a random initial outbreak
+- Allow a random initial outbreak [DONE]
 - Make schema for datatypes [DONE]
-- Make initial outbreak customizable
+- Make initial outbreak customizable [DONE]
