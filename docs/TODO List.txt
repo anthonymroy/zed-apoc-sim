@@ -2,7 +2,7 @@
 - Save simulations [DONE]
 - Seperate sim and animation [DONE]
 - Make main.py the only file to directly reference non-pathfile conf variables.
-- Implement counties for a single state
+- Implement counties for a single state [DONE]
 - Add human learning
 - Add zombie decay
 - Add human migration
@@ -11,7 +11,7 @@
 - Add zombie learning
 - Add carriers / incubation period
 - Ad immune humans
-- Add human-to-human violence
+- Add human-to-human effects
 - Use gun data
 - Use school data
 - Enable cloud runs
@@ -28,3 +28,6 @@
 - Add fight vs flight humans
 - Add tests
 - Include instructions on how to use runtime arguements [DONE]
+- Allow a random initial outbreak
+- Make schema for datatypes [DONE]
+- Make initial outbreak customizable

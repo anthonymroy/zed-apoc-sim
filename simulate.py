@@ -1,41 +1,33 @@
 import config
+import data.schema as sch
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import random 
+
+def outbreak(src_df:pd.DataFrame) -> pd.DataFrame:
+    ret_df = src_df.copy()
+    ground_zero = config.OUTBREAK_START
+    if ground_zero not in list(ret_df.index):
+        ground_zero = random.choice(list(ret_df.index))      
+    ret_df.at[ground_zero, "population_z"] = round(0.01*ret_df.at[ground_zero, "population_h"]) 
+    return ret_df
 
 def set_features(index:list) -> pd.DataFrame:
-    df = pd.DataFrame(columns=[
-        "population_h",
-        "population_z",
-        "population_density_h",
-        "population_density_z",
-        "encounter_chance_h",
-        "encounter_chance_z",
-        "escape_chance_h",
-        "escape_chance_z",
-        "bit_h",
-        "killed_z",
-        "migration_z",
-        "border_porosity_z",
-        "border_length",
-        "area",
-        "compactness",
-        "neighbors"
-    ])
+    df = pd.DataFrame(columns=sch.SimulationSchema.columns)
     df["index"] = index
-    df.set_index("index", inplace=True)
+    df.set_index("index", inplace=True)    
     return df
 
 def set_initial_conditions(src_df:pd.DataFrame, p_df:pd.DataFrame) -> pd.DataFrame:
-     ret_df = src_df.copy()
-     ret_df["population_h"] = p_df["POP"]
-     ret_df["escape_chance_h"] = config.INITIAL_ESCAPE_CHANCE_H
-     ret_df["escape_chance_z"] = config.INITIAL_ESCAPE_CHANGE_Z
-     ret_df["border_porosity_z"] = config.BORDER_POROSITY
-     ret_df.fillna(0.0, inplace=True)
-     #ZOMBIE ATTACK!     
-     ret_df.at["Pennsylvania", "population_z"] = round(0.01*ret_df.at["Pennsylvania", "population_h"])
-     return ret_df
+    ret_df = src_df.copy()
+    ret_df["population_h"] = p_df["POP"]
+    ret_df["escape_chance_h"] = config.INITIAL_ESCAPE_CHANCE_H
+    ret_df["escape_chance_z"] = config.INITIAL_ESCAPE_CHANGE_Z
+    ret_df["border_porosity_z"] = config.BORDER_POROSITY
+    ret_df = ret_df.fillna(0.0)
+    ret_df = outbreak(ret_df)
+    return ret_df
 
 def calculate_static_values(src_df:pd.DataFrame, gdf:gpd.GeoDataFrame, b_df:pd.DataFrame) -> pd.DataFrame:
     ret_df = src_df.copy()
@@ -55,7 +47,7 @@ def calculate_migration(src_df:pd.DataFrame) -> pd.Series:
         my_porosity = ret_df.at[my_name,"border_porosity_z"]
         my_compactness = ret_df.at[my_name,"compactness"]
         for neighbor in ret_df.at[my_name,"neighbors"]:
-            name_n = neighbor["name"]
+            name_n = neighbor["neighbor_name"]
             conc_n = ret_df.at[name_n,"population_density_z"]
             fraction = neighbor["fraction"]
             rate_n = my_porosity * fraction / my_compactness
@@ -68,7 +60,11 @@ def calculate_derived_values(src_df:pd.DataFrame) -> pd.DataFrame:
     ret_df["population_density_h"] = ret_df["population_h"] / ret_df["area"]
     ret_df["population_density_z"] = ret_df["population_z"] / ret_df["area"]
     ret_df["encounter_chance_h"] = ret_df["population_z"] / (ret_df["population_h"] + ret_df["population_z"])
+    #ret_df["encounter_chance_h"].fillna(0.0, inplace=True) #Fix for if total population is 0
+    ret_df["encounter_chance_h"] = ret_df["encounter_chance_h"].fillna(0.0) #Fix for if total population is 0
     ret_df["encounter_chance_z"] = ret_df["population_h"] / (ret_df["population_h"] + ret_df["population_z"])
+    #ret_df["encounter_chance_z"].fillna(0.0, inplace=True) #Fix for if total population is 0
+    ret_df["encounter_chance_z"] = ret_df["encounter_chance_z"].fillna(0.0) #Fix for if total population is 0
     ret_df["bit_h"] = (ret_df["population_h"] * ret_df["encounter_chance_h"] * (1 - ret_df["escape_chance_h"])).apply(np.ceil)
     ret_df["bit_h"] = ret_df["bit_h"].apply(max, args=(0,))
     ret_df["killed_z"] = (ret_df["population_z"] * ret_df["encounter_chance_z"] * (1 - ret_df["escape_chance_z"])).apply(np.ceil)
@@ -78,8 +74,9 @@ def calculate_derived_values(src_df:pd.DataFrame) -> pd.DataFrame:
 
 def initialize(shape_gdf:gpd.GeoDataFrame, border_df:pd.DataFrame, population_df:pd.DataFrame) -> pd.DataFrame:
     ret_df = set_features(list(shape_gdf.index))
-    ret_df = calculate_static_values(ret_df, shape_gdf, border_df)
+    ret_df = calculate_static_values(ret_df, shape_gdf, border_df)    
     ret_df = set_initial_conditions(ret_df, population_df)
+    ret_df = sch.clean_df(ret_df, sch.SimulationSchema)
     ret_df = calculate_derived_values(ret_df)
     return ret_df        
 
@@ -105,5 +102,7 @@ def run(initial_df:pd.DataFrame) -> list[pd.DataFrame]:
 
 if __name__ == "__main__":
     import setup
-    shape_gdf, border_df, population_df = setup.main("state")
+    region = "CA"
+    shape_gdf, border_df, population_df = setup.main(region)
     initial_df = initialize(shape_gdf, border_df, population_df)
+    print(initial_df.loc[initial_df.index[0]])

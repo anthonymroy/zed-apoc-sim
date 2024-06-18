@@ -1,5 +1,8 @@
-matplotlib #matplotlib might have to be at the top of the list to get the bug-free version
-census
-geopandas
-pandas
-pygris
+matplotlib==3.9.0 #matplotlib might have to be at the top of the list to get the bug-free version
+census==0.8.22
+geopandas==0.14.4
+numpy==1.26
+pandas==2.2.2
+pandera==0.19.3
+py-linq==1.4.0
+pygris==0.1.6

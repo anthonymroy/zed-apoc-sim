@@ -7,10 +7,10 @@ import setup
 import simulate
 import visualization as viz
 
-MODE = "state"
-
 def parse_arguments() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()    
+    parser = argparse.ArgumentParser(description="Simulate a zombie outbreak")    
+    parser.add_argument("region", default=config.DEFAULT_REGION,
+                           help="The two-letter region to simulate. 'US' is the default value")
     parser.add_argument("--sim", dest="sim_only", action="store_true", default=False,
                            help="Flag to run only the simulation without visualization")
     parser.add_argument("--viz", dest="viz_only", action="store_true", default=False,
@@ -20,8 +20,8 @@ def parse_arguments() -> argparse.Namespace:
 if __name__ == "__main__":
     my_args = parse_arguments()
     
-    shape_gdf, border_df, population_df = setup.main(MODE) 
-    my_args.viz_only = True
+    shape_gdf, border_df, population_df = setup.main(my_args.region.upper()) 
+    
     if my_args.viz_only:
         if not os.path.exists(config.LAST_SIMULATION_FILENAME):
             e = FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), config.LAST_SIMULATION_FILENAME)
