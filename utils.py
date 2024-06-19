@@ -1,4 +1,5 @@
 import json
+import math
 from pandas import DataFrame
 import shapely.geometry as sg
 
@@ -22,6 +23,9 @@ def read_json_file(filename:str) -> list[dict]:
 def df_from_json(filename:str, index=None) -> DataFrame:
     data = read_json_file(filename)
     return DataFrame.from_records(data, index=index)
+
+def sigmoid(x:float, m:float=1, b:float=0) -> float:
+  return 1 / (1 + math.exp(-m*(x-b)))
 
 if __name__ == "__main__":
     # For development and testing
