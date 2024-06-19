@@ -11,7 +11,8 @@ def outbreak(src_df:pd.DataFrame) -> pd.DataFrame:
     ground_zero = config.OUTBREAK_START
     if ground_zero not in list(ret_df.index):
         ground_zero = random.choice(list(ret_df.index))      
-    ret_df.at[ground_zero, "population_z"] = round(0.01*ret_df.at[ground_zero, "population_h"]) 
+    #ret_df.at[ground_zero, "population_z"] = round(0.01*ret_df.at[ground_zero, "population_h"]) 
+    ret_df.at[ground_zero, "population_z"] = 2
     return ret_df
 
 def set_features(index:list) -> pd.DataFrame:
@@ -56,8 +57,6 @@ def calculate_migration(src_df:pd.DataFrame) -> pd.Series:
         ret_df.at[my_name,"migration"] = int(total)
     return ret_df["migration"]
 
-def calculate_bite_chance()
-
 def calculate_derived_values(src_df:pd.DataFrame) -> pd.DataFrame:    
     ret_df = src_df.copy()
     ret_df["population_density_h"] = ret_df["population_h"] / ret_df["area"]
@@ -66,8 +65,8 @@ def calculate_derived_values(src_df:pd.DataFrame) -> pd.DataFrame:
     ret_df["encounter_chance_h"] = ret_df["encounter_chance_h"].fillna(0.0) #Fix for if total population is 0
     ret_df["encounter_chance_z"] = ret_df["population_h"] / (ret_df["population_h"] + ret_df["population_z"])
     ret_df["encounter_chance_z"] = ret_df["encounter_chance_z"].fillna(0.0) #Fix for if total population is 0
-    ret_df["escape_chance_h"] = 0.9*ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(1, 2)) + 0.05
-    ret_df["escape_chance_z"] = 0.95 - 0.9*ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(1, 10))
+    ret_df["escape_chance_h"] = ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(.5, 2))
+    ret_df["escape_chance_z"] = 1 - ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(.5, 10))
     ret_df["bit_h"] = (ret_df["population_h"] * ret_df["encounter_chance_h"] * (1 - ret_df["escape_chance_h"])).apply(np.ceil)
     ret_df["bit_h"] = ret_df["bit_h"].apply(max, args=(0,))
     ret_df["killed_z"] = (ret_df["population_z"] * ret_df["encounter_chance_z"] * (1 - ret_df["escape_chance_z"])).apply(np.ceil)

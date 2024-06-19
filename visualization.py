@@ -98,7 +98,10 @@ def make_animation(data:list[GeoDataFrame], fps:float, duration:float) -> animat
     )
     return mov
 
+def show_animation() -> None:
+    plt.show()
+
 def save_animation(video:animation.FuncAnimation, filename:str, fps:float) -> None:
     writer = animation.PillowWriter(fps=fps)
     video.save(filename, writer=writer)
-    plt.close()
+    #plt.close()
