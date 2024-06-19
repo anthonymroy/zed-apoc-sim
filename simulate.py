@@ -4,13 +4,15 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import random 
+import utils
 
 def outbreak(src_df:pd.DataFrame) -> pd.DataFrame:
     ret_df = src_df.copy()
     ground_zero = config.OUTBREAK_START
     if ground_zero not in list(ret_df.index):
         ground_zero = random.choice(list(ret_df.index))      
-    ret_df.at[ground_zero, "population_z"] = round(0.01*ret_df.at[ground_zero, "population_h"]) 
+    #ret_df.at[ground_zero, "population_z"] = round(0.01*ret_df.at[ground_zero, "population_h"]) 
+    ret_df.at[ground_zero, "population_z"] = 2
     return ret_df
 
 def set_features(index:list) -> pd.DataFrame:
@@ -60,11 +62,11 @@ def calculate_derived_values(src_df:pd.DataFrame) -> pd.DataFrame:
     ret_df["population_density_h"] = ret_df["population_h"] / ret_df["area"]
     ret_df["population_density_z"] = ret_df["population_z"] / ret_df["area"]
     ret_df["encounter_chance_h"] = ret_df["population_z"] / (ret_df["population_h"] + ret_df["population_z"])
-    #ret_df["encounter_chance_h"].fillna(0.0, inplace=True) #Fix for if total population is 0
     ret_df["encounter_chance_h"] = ret_df["encounter_chance_h"].fillna(0.0) #Fix for if total population is 0
     ret_df["encounter_chance_z"] = ret_df["population_h"] / (ret_df["population_h"] + ret_df["population_z"])
-    #ret_df["encounter_chance_z"].fillna(0.0, inplace=True) #Fix for if total population is 0
     ret_df["encounter_chance_z"] = ret_df["encounter_chance_z"].fillna(0.0) #Fix for if total population is 0
+    ret_df["escape_chance_h"] = ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(.5, 2))
+    ret_df["escape_chance_z"] = 1 - ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(.5, 10))
     ret_df["bit_h"] = (ret_df["population_h"] * ret_df["encounter_chance_h"] * (1 - ret_df["escape_chance_h"])).apply(np.ceil)
     ret_df["bit_h"] = ret_df["bit_h"].apply(max, args=(0,))
     ret_df["killed_z"] = (ret_df["population_z"] * ret_df["encounter_chance_z"] * (1 - ret_df["escape_chance_z"])).apply(np.ceil)
@@ -85,7 +87,8 @@ def time_step(src_df:pd.DataFrame) -> pd.DataFrame:
     ret_df["population_h"] = ret_df["population_h"] - ret_df["bit_h"]
     ret_df["population_h"] = ret_df["population_h"].apply(max, args=(0,))
     ret_df["population_z"] = ret_df["population_z"] + ret_df["bit_h"] - ret_df["killed_z"] + ret_df["migration_z"]
-    ret_df["population_z"] = ret_df["population_z"].apply(max, args=(0,))
+    ret_df["population_z"] = ret_df["population_z"].apply(max, args=(0,))    
+    ret_df["cumulative_encounters_h"] += ret_df["encounter_chance_h"]
     ret_df = calculate_derived_values(ret_df)
     return ret_df
 
