@@ -3,7 +3,7 @@
 - Seperate sim and animation [DONE]
 - Make main.py the only file to directly reference non-pathfile conf variables.
 - Implement counties for a single state [DONE]
-- Add human learning
+- Add human learning [DONE]
 - Add zombie decay
 - Add human migration
 - Add UI
