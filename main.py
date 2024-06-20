@@ -33,15 +33,20 @@ if __name__ == "__main__":
         time_data = simulate.run(data_df)        
         pickle.dump(time_data, open(config.LAST_SIMULATION_FILENAME, 'wb'))
 
-    if not my_args.sim_only:    
+    time_totals = simulate.summarize(time_data)
+
+    if not my_args.sim_only:            
         plot_data = viz.generate_plot_data(time_data, shape_gdf)
-        # ani.make_image(plot_data,500)
-        mov = viz.make_animation(plot_data, config.FPS, config.ANIMATION_DURATION)        
+        
+        #viz.make_geo_image(plot_data,10)
+        #mov = viz.make_animation(plot_data, config.FPS, config.ANIMATION_DURATION)        
+        #viz.save_animation(mov, config.VIDEO_FILENAME, config.FPS)
+
+        # viz.make_image(plot_data, time_totals, 100)
+        mov = viz.make_animation2(plot_data, time_totals, config.FPS, config.ANIMATION_DURATION)     
         viz.save_animation(mov, config.VIDEO_FILENAME, config.FPS)
 
     print("Zombie Apocalypse Simulation complete:")
-    initial_df = time_data[0]
-    final_df = time_data[-1]    
-    print(f"Initial population: {sum(initial_df['population_h'])}")
-    print(f"Final population: {sum(final_df['population_h'])}")
-    print(f"Maximum zed population: {max([max(df['population_z']) for df in time_data])}")
+    print(f"Initial population: {time_totals.at[0,'population_h']}")
+    print(f"Final population: {time_totals.at[config.DAYS_TO_SIMULATE,'population_h']}")
+    print(f"Maximum zed population: {max([sum(df['population_z']) for df in time_data])}")

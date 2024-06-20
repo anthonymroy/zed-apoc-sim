@@ -4,6 +4,7 @@ import math
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 from pandas import DataFrame
+import utils
 
 TIME_PROGRESSION_ERROR_MESSAGE = "TIME_PROGRESSION must be 'lin' or 'log'"
 
@@ -44,14 +45,25 @@ def calculate_key_frames_logarithmic(data_length:int, number_of_frames:int) -> l
     key_frames.append(data_length-1)
     return key_frames
 
-def setup_plot(data:list[GeoDataFrame]) -> tuple[plt.Figure, any, float, float]:
+def setup_plot(data:list[GeoDataFrame]) -> tuple[plt.Figure, any, tuple[float], tuple[float]]:
     fig, ax = plt.subplots(1, figsize=(8, 4))
     _ = fig.suptitle(config.PLOT_TITLE, fontdict={'fontsize': '20', 'fontweight' : '2'})
     xlim = (data.total_bounds[0], data.total_bounds[2])
     ylim = (data.total_bounds[1], data.total_bounds[3])
     return (fig, ax, xlim, ylim)
 
-def generate_frame(frame:int, ax:any, xlim:float, ylim:float, data:list[GeoDataFrame]) -> None:
+def setup_plot2(data1:list[GeoDataFrame], data2:list[DataFrame]) -> tuple[plt.Figure, any, any, tuple[float], tuple[float], tuple[float]]:
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4))
+    _ = fig.suptitle(config.PLOT_TITLE, fontdict={'fontsize': '20', 'fontweight' : '2'})
+    xlim = (data1.total_bounds[0], data1.total_bounds[2])
+    ylim1 = (data1.total_bounds[1], data1.total_bounds[3])
+    ylim2 = (0, 8)
+    ax2.yaxis.tick_right()
+    ax2.spines['top'].set_visible(False)
+    ax2.spines['left'].set_visible(False)
+    return (fig, ax1, ax2, xlim, ylim1, ylim2)
+
+def generate_geo_frame(frame:int, ax:any, xlim:tuple[float], ylim:tuple[float], data:list[GeoDataFrame]) -> None:
     # Clear and redraw progress annotation
     progress =  f"Day: {frame}"
     #Configure axes
@@ -71,10 +83,100 @@ def generate_frame(frame:int, ax:any, xlim:float, ylim:float, data:list[GeoDataF
     data.plot(ax=ax, column=frame, legend=False, cmap=config.COLORMAP, norm=norm)
     print(progress)
 
-def make_image(data:list[GeoDataFrame], frame:int) -> None:
+def make_geo_image(data:list[GeoDataFrame], frame:int) -> None:
     _, ax, xlim, ylim = setup_plot(data) 
-    generate_frame(frame, ax, xlim, ylim, data)
+    generate_geo_frame(frame, ax, xlim, ylim, data)
     plt.show()
+
+def generate_totals_frame(frame:int, ax:any, ylim:tuple[float], data:list[GeoDataFrame]) -> None:
+    ax.clear()
+    ax.set_ylim(ylim)
+    ax.axis('off')     
+
+    columns = data.columns.to_list()
+    values = data.loc[data.index[frame]].apply(math.log10).to_list()
+    labels = ["humans", "zeds"]
+    colors = ["green", "red"]
+    plt.bar(columns, values, label=labels, color=colors)
+
+def make_totals_image(data:DataFrame, frame:int) -> None:
+    fig, _ = plt.subplots(1, figsize=(8, 4))
+    _ = fig.suptitle("TOTALS", fontdict={'fontsize': '20', 'fontweight' : '2'})
+    ylim = (0, 16)
+    generate_totals_frame(frame, ylim, data)
+    plt.show()
+
+def make_image(geo_data:list[GeoDataFrame], pop_data:DataFrame, frame:int) -> None:
+    (fig, ax1, ax2, xlim, ylim1, ylim2) = setup_plot2(geo_data, pop_data)
+    # _ = fig.suptitle("TOTALS", fontdict={'fontsize': '20', 'fontweight' : '2'})
+    generate_frame2(frame, ax1, ax2, xlim, ylim1, ylim2, geo_data, pop_data)
+    plt.show()
+
+def generate_frame2(
+        frame:int, 
+        ax1:any,
+        ax2:any,
+        xlim:tuple[float], 
+        ylim1:tuple[float],
+        ylim2:tuple[float], 
+        geo_data:list[GeoDataFrame], 
+        pop_data:list[DataFrame]
+    ) -> None:
+
+    # Clear and redraw progress annotation
+    progress =  f"Day: {frame}"
+    #Configure axes
+    ax1.clear()
+    ax1.set_xlim(xlim)
+    ax1.set_ylim(ylim1)
+    ax1.axis('off')        
+    ax1.annotate(progress, xy=(0.5, -0.05), xycoords='axes fraction', fontsize=12, ha='center')        
+
+    ax2.clear()
+    ax2.set_ylim(ylim2)
+    # ax2.yaxis.tick_right()
+    # ax2.spines['top'].set_visible(False)
+    # ax2.spines['left'].set_visible(False)
+    # ax2.axis('off')     
+
+    # Plot geo boundaries
+    _ = geo_data.boundary.plot(ax=ax1, edgecolor='black', linewidth=0.2)
+
+    # Normalize colormap    
+    norm = plt.Normalize(vmin=config.VMIN, vmax=config.VMAX)
+
+    # Plot the data for the current year
+    geo_data.plot(ax=ax1, column=frame, legend=False, cmap=config.COLORMAP, norm=norm)
+
+    #Plot population
+    columns = pop_data.columns.to_list()
+    values = pop_data.loc[pop_data.index[frame]].apply(utils.safe_log).to_list()
+    labels = ["humans", "zeds"]
+    colors = ["green", "red"]
+    ax2.bar(columns, values, width=0.4, label=labels, color=colors)
+    print(progress)
+
+def make_animation2(geo_data:list[GeoDataFrame], pop_data:list[DataFrame], fps:float, duration:float) -> animation.FuncAnimation:
+    (fig, ax1, ax2, xlim, ylim1, ylim2) = setup_plot2(geo_data, pop_data)    
+    total_frames = fps * duration + 1
+    match config.TIME_PROGRESSION:
+        case "lin":
+            key_frames = calculate_key_frames_linear(len(geo_data.keys())-1, total_frames)
+        case "log":
+            key_frames = calculate_key_frames_logarithmic(len(geo_data.keys())-1, total_frames)
+        case _:
+            raise ValueError(TIME_PROGRESSION_ERROR_MESSAGE)
+       
+    # Create the animation
+    mov = animation.FuncAnimation(
+        fig=fig,
+        func=generate_frame2,        
+        fargs=(ax1, ax2, xlim, ylim1, ylim2, geo_data, pop_data),
+        frames=key_frames,
+        repeat=False,
+        interval=1000
+    )
+    return mov
 
 def make_animation(data:list[GeoDataFrame], fps:float, duration:float) -> animation.FuncAnimation:
     fig, ax, xlim, ylim = setup_plot(data)    
@@ -90,7 +192,7 @@ def make_animation(data:list[GeoDataFrame], fps:float, duration:float) -> animat
     # Create the animation
     mov = animation.FuncAnimation(
         fig=fig,
-        func=generate_frame,        
+        func=generate_geo_frame,        
         fargs=(ax, xlim, ylim, data),
         frames=key_frames,
         repeat=False,

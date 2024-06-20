@@ -1,7 +1,7 @@
 import os
 
 DEFAULT_REGION = "US"
-OUTBREAK_START = "Cuyahoga"
+OUTBREAK_START = "Wayne"
 
 INITIAL_ESCAPE_CHANCE_H = 0.7
 INITIAL_ESCAPE_CHANGE_Z = 0.75
@@ -10,7 +10,7 @@ DAYS_TO_SIMULATE = 400
 VIDEO_FILENAME = "Zombie Apocalypse Simulation.gif"
 PLOT_TITLE = "Zombie Apocalypse Simulator"
 FPS = 10
-ANIMATION_DURATION = 10
+ANIMATION_DURATION = 15
 TIME_PROGRESSION = "lin" #Must be "lin" or "log"
 COLORMAP = "RdYlGn"
 VMIN = 0

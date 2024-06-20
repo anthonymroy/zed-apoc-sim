@@ -65,13 +65,14 @@ def calculate_derived_values(src_df:pd.DataFrame) -> pd.DataFrame:
     ret_df["encounter_chance_h"] = ret_df["encounter_chance_h"].fillna(0.0) #Fix for if total population is 0
     ret_df["encounter_chance_z"] = ret_df["population_h"] / (ret_df["population_h"] + ret_df["population_z"])
     ret_df["encounter_chance_z"] = ret_df["encounter_chance_z"].fillna(0.0) #Fix for if total population is 0
-    ret_df["escape_chance_h"] = ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(.5, 2))
-    ret_df["escape_chance_z"] = 1 - ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(.5, 10))
-    ret_df["bit_h"] = (ret_df["population_h"] * ret_df["encounter_chance_h"] * (1 - ret_df["escape_chance_h"])).apply(np.ceil)
+    ret_df["escape_chance_h"] = 0.75*ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(1, 2))
+    ret_df["escape_chance_z"] = 1 - 0.75*ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(1, 2))
+    ret_df["bit_h"] = (ret_df["population_h"] * ret_df["encounter_chance_h"] * (1 - ret_df["escape_chance_h"])).apply(np.round)
     ret_df["bit_h"] = ret_df["bit_h"].apply(max, args=(0,))
-    ret_df["killed_z"] = (ret_df["population_z"] * ret_df["encounter_chance_z"] * (1 - ret_df["escape_chance_z"])).apply(np.ceil)
+    ret_df["killed_z"] = (ret_df["population_z"] * ret_df["encounter_chance_z"] * (1 - ret_df["escape_chance_z"])).apply(np.round)
     ret_df["killed_z"] = ret_df["killed_z"].apply(max, args=(0,))
-    ret_df["migration_z"] = (calculate_migration(ret_df) * ret_df["encounter_chance_z"] * (1 - ret_df["escape_chance_z"])).apply(np.round)
+    # ret_df["migration_z"] = (calculate_migration(ret_df) * ret_df["encounter_chance_z"] * (1 - ret_df["escape_chance_z"])).apply(np.round)
+    ret_df["migration_z"] = calculate_migration(ret_df).apply(np.round)
     return ret_df
 
 def initialize(shape_gdf:gpd.GeoDataFrame, border_df:pd.DataFrame, population_df:pd.DataFrame) -> pd.DataFrame:
@@ -103,9 +104,21 @@ def run(initial_df:pd.DataFrame) -> list[pd.DataFrame]:
         data.append(df_0)
     return data
 
+def summarize(simulation:list[pd.DataFrame]) -> pd.DataFrame:
+    summary = []
+    for day in range(len(simulation)):
+        total_h = sum(simulation[day]['population_h'])
+        total_z = sum(simulation[day]['population_z'])
+        summary.append({
+            "day": day,
+            "population_h": total_h,
+            "population_z":total_z
+        })
+    return pd.DataFrame.from_records(summary, index="day")
+
 if __name__ == "__main__":
     import setup
-    region = "CA"
+    region = "IN"
     shape_gdf, border_df, population_df = setup.main(region)
     initial_df = initialize(shape_gdf, border_df, population_df)
     print(initial_df.loc[initial_df.index[0]])
