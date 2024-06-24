@@ -32,3 +32,4 @@
 - Allow a random initial outbreak [DONE]
 - Make schema for datatypes [DONE]
 - Make initial outbreak customizable [DONE]
+- Report initial and ending values to screen

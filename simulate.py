@@ -59,14 +59,15 @@ def calculate_migration(src_df:pd.DataFrame) -> pd.Series:
 
 def calculate_derived_values(src_df:pd.DataFrame) -> pd.DataFrame:    
     ret_df = src_df.copy()
+    learning_asymptote = 0.98 
     ret_df["population_density_h"] = ret_df["population_h"] / ret_df["area"]
     ret_df["population_density_z"] = ret_df["population_z"] / ret_df["area"]
     ret_df["encounter_chance_h"] = ret_df["population_z"] / (ret_df["population_h"] + ret_df["population_z"])
     ret_df["encounter_chance_h"] = ret_df["encounter_chance_h"].fillna(0.0) #Fix for if total population is 0
     ret_df["encounter_chance_z"] = ret_df["population_h"] / (ret_df["population_h"] + ret_df["population_z"])
     ret_df["encounter_chance_z"] = ret_df["encounter_chance_z"].fillna(0.0) #Fix for if total population is 0
-    ret_df["escape_chance_h"] = 0.75*ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(1, 2))
-    ret_df["escape_chance_z"] = 1 - 0.75*ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(1, 2))
+    ret_df["escape_chance_h"] = learning_asymptote*ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(1.1, 2))
+    ret_df["escape_chance_z"] = 1 - 0.5*learning_asymptote*ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(1, 4))
     ret_df["bit_h"] = (ret_df["population_h"] * ret_df["encounter_chance_h"] * (1 - ret_df["escape_chance_h"])).apply(np.round)
     ret_df["bit_h"] = ret_df["bit_h"].apply(max, args=(0,))
     ret_df["killed_z"] = (ret_df["population_z"] * ret_df["encounter_chance_z"] * (1 - ret_df["escape_chance_z"])).apply(np.round)
@@ -111,8 +112,8 @@ def summarize(simulation:list[pd.DataFrame]) -> pd.DataFrame:
         total_z = sum(simulation[day]['population_z'])
         summary.append({
             "day": day,
-            "population_h": total_h,
-            "population_z":total_z
+            "population_h_log10": utils.safe_log10(total_h),
+            "population_z_log10": utils.safe_log10(total_z)
         })
     return pd.DataFrame.from_records(summary, index="day")
 

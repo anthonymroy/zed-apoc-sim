@@ -36,17 +36,20 @@ if __name__ == "__main__":
     time_totals = simulate.summarize(time_data)
 
     if not my_args.sim_only:            
-        plot_data = viz.generate_plot_data(time_data, shape_gdf)
-        
+        plot_data = viz.generate_geo_plot_data(time_data, shape_gdf)
+                
         #viz.make_geo_image(plot_data,10)
-        #mov = viz.make_animation(plot_data, config.FPS, config.ANIMATION_DURATION)        
-        #viz.save_animation(mov, config.VIDEO_FILENAME, config.FPS)
+        #mov = viz.make_animation(plot_data, config.FPS, config.ANIMATION_DURATION)   
 
         # viz.make_image(plot_data, time_totals, 100)
-        mov = viz.make_animation2(plot_data, time_totals, config.FPS, config.ANIMATION_DURATION)     
+        # mov = viz.make_geo_bar_animation(plot_data, time_totals, config.FPS, config.ANIMATION_DURATION)  
+         
+        # viz.make_line_image(time_totals, 10)   
+        mov = viz.make_geo_line_animation(plot_data, time_totals, config.FPS, config.ANIMATION_DURATION)  
         viz.save_animation(mov, config.VIDEO_FILENAME, config.FPS)
+        #viz.show_animation()
 
     print("Zombie Apocalypse Simulation complete:")
-    print(f"Initial population: {time_totals.at[0,'population_h']}")
-    print(f"Final population: {time_totals.at[config.DAYS_TO_SIMULATE,'population_h']}")
-    print(f"Maximum zed population: {max([sum(df['population_z']) for df in time_data])}")
+    print(f"Initial population: {round(pow(10,time_totals.at[0,'population_h_log10'])):,d}")
+    print(f"Final population: {round(pow(10,time_totals.at[config.DAYS_TO_SIMULATE,'population_h_log10'])):,d}")
+    print(f"Maximum zed population: {round(max([sum(df['population_z']) for df in time_data])):,d}")
