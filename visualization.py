@@ -2,13 +2,15 @@ import config
 from geopandas import GeoDataFrame
 import math
 import matplotlib.animation as animation
+from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
+from matplotlib.text import Text
 from pandas import DataFrame
 import utils
 
 TIME_PROGRESSION_ERROR_MESSAGE = "TIME_PROGRESSION must be 'lin' or 'log'"
 
-def generate_geo_plot_data(src_data_list:list[DataFrame], gdf:GeoDataFrame):
+def generate_geo_plot_data(src_data_list:list[DataFrame], gdf:GeoDataFrame) -> GeoDataFrame:
     data = []
     for step in range(len(src_data_list)):
         pop_h = src_data_list[step]["population_h"]
@@ -45,35 +47,52 @@ def calculate_key_frames_logarithmic(data_length:int, number_of_frames:int) -> l
     key_frames.append(data_length-1)
     return key_frames
 
-def setup_plot(data:list[GeoDataFrame]) -> tuple[plt.Figure, any, tuple[float], tuple[float]]:
+def setup_geo_plot(data:GeoDataFrame) -> tuple[Figure, any, tuple[float], tuple[float]]:
     fig, ax = plt.subplots(1, figsize=(8, 4))
     _ = fig.suptitle(config.PLOT_TITLE, fontdict={'fontsize': '20', 'fontweight' : '2'})
     xlim = (data.total_bounds[0], data.total_bounds[2])
     ylim = (data.total_bounds[1], data.total_bounds[3])
     return (fig, ax, xlim, ylim)
 
-def setup_geo_bar_plot(data1:list[GeoDataFrame], data2:list[DataFrame]) -> tuple[plt.Figure, any, any, tuple[float], tuple[float], tuple[float]]:
+def setup_geo_bar_plot(data1:GeoDataFrame, data2:list[DataFrame]) -> tuple[Figure, any, any, tuple[float], tuple[float], tuple[float], Text]:
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4))
     _ = fig.suptitle(config.PLOT_TITLE, fontdict={'fontsize': '20', 'fontweight' : '2'})
     xlim = (data1.total_bounds[0], data1.total_bounds[2])
     ylim1 = (data1.total_bounds[1], data1.total_bounds[3])
-    ylim2 = (0, 8)
+    ylim2 = (0, math.ceil(max(data2["population_h_log10"].to_list())))
     ax2.yaxis.tick_right()
     ax2.spines['top'].set_visible(False)
     ax2.spines['left'].set_visible(False)
-    return (fig, ax1, ax2, xlim, ylim1, ylim2)
+    prog_text = fig.text(0.30, 0.04, "Day: 0", ha="center", va="bottom")
+    return (fig, ax1, ax2, xlim, ylim1, ylim2, prog_text)
 
-def setup_geo_line_plot(data1:list[GeoDataFrame], data2:list[DataFrame]) -> tuple[plt.Figure, any, any, tuple[float], tuple[float], tuple[float]]:
+def setup_geo_line_plot(data1:GeoDataFrame, data2:list[DataFrame]) -> tuple[Figure, any, any, tuple[float], tuple[float], tuple[float], Text]:
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4))
-    _ = fig.suptitle(config.PLOT_TITLE, fontdict={'fontsize': '20', 'fontweight' : '2'})
+    _ = fig.suptitle(config.PLOT_TITLE, fontdict={'fontsize': '20', 'fontweight' : '2'})    
     xlim1 = (data1.total_bounds[0], data1.total_bounds[2])
     ylim1 = (data1.total_bounds[1], data1.total_bounds[3])
-    xlim2 = (0, len(data2)-1)
-    ylim2 = (0, 8)
+    xlim2 = (0, len(data2)-1)   
+    ylim2 = (0, math.ceil(max(data2["population_h_log10"].to_list())))
     ax2.yaxis.tick_right()
     ax2.spines['top'].set_visible(False)
     ax2.spines['left'].set_visible(False)
-    return (fig, ax1, ax2, xlim1, ylim1, xlim2, ylim2)
+    prog_text = fig.text(0.30, 0.04, "Day: 0", ha="center", va="bottom")
+    return (fig, ax1, ax2, xlim1, ylim1, xlim2, ylim2, prog_text)
+
+def make_geo_image(data:GeoDataFrame, frame:int) -> None:
+     _, ax, xlim, ylim = setup_geo_plot(data) 
+     generate_geo_frame(frame, ax, xlim, ylim, data)
+     plt.show()
+
+def make_bar_image(geo_data:GeoDataFrame, pop_data:DataFrame, frame:int) -> None:
+    (_, ax1, ax2, xlim, ylim1, ylim2, progress_text) = setup_geo_bar_plot(geo_data, pop_data)
+    generate_geo_bar_frame(frame, ax1, ax2, xlim, ylim1, ylim2, geo_data, pop_data, progress_text)
+    plt.show()
+
+def make_line_image(geo_data:GeoDataFrame, pop_data:DataFrame, frame:int) -> None:
+    (_, ax1, ax2, xlim1, ylim1, xlim2, ylim2, progress_text) = setup_geo_bar_plot(geo_data, pop_data)
+    generate_geo_bar_frame(frame, ax1, ax2, xlim1, ylim1, xlim2, ylim2, geo_data, pop_data, progress_text)
+    plt.show()
 
 def generate_geo_frame(frame:int, ax:any, xlim:tuple[float], ylim:tuple[float], data:list[GeoDataFrame]) -> None:
     # Clear and redraw progress annotation
@@ -95,56 +114,6 @@ def generate_geo_frame(frame:int, ax:any, xlim:tuple[float], ylim:tuple[float], 
     data.plot(ax=ax, column=frame, legend=False, cmap=config.COLORMAP, norm=norm)
     print(progress)
 
-# def make_geo_image(data:list[GeoDataFrame], frame:int) -> None:
-#     _, ax, xlim, ylim = setup_plot(data) 
-#     generate_geo_frame(frame, ax, xlim, ylim, data)
-#     plt.show()
-
-# def generate_totals_frame(frame:int, ax:any, ylim:tuple[float], data:list[GeoDataFrame]) -> None:
-#     ax.clear()
-#     ax.set_ylim(ylim)
-#     ax.axis('off')     
-
-#     columns = data.columns.to_list()
-#     values = data.loc[data.index[frame]].apply(math.log10).to_list()
-#     labels = ["humans", "zeds"]
-#     colors = ["green", "red"]
-#     plt.bar(columns, values, label=labels, color=colors)
-
-# def make_totals_image(data:DataFrame, frame:int) -> None:
-#     fig, _ = plt.subplots(1, figsize=(8, 4))
-#     _ = fig.suptitle("TOTALS", fontdict={'fontsize': '20', 'fontweight' : '2'})
-#     ylim = (0, 16)
-#     generate_totals_frame(frame, ylim, data)
-#     plt.show()
-
-def make_bar_image(geo_data:list[GeoDataFrame], pop_data:DataFrame, frame:int) -> None:
-    (fig, ax1, ax2, xlim, ylim1, ylim2) = setup_geo_bar_plot(geo_data, pop_data)
-    # _ = fig.suptitle("TOTALS", fontdict={'fontsize': '20', 'fontweight' : '2'})
-    generate_geo_bar_frame(frame, ax1, ax2, xlim, ylim1, ylim2, geo_data, pop_data)
-    plt.show()
-
-def make_line_image(pop_data:DataFrame, frame:int) -> None:
-    # Setup plot
-    fig, ax2 = plt.subplots(1, 1, figsize=(8, 4))
-    _ = fig.suptitle(config.PLOT_TITLE, fontdict={'fontsize': '20', 'fontweight' : '2'})
-    ylim2 = (0, 8)
-    ax2.yaxis.tick_right()
-    ax2.spines['top'].set_visible(False)
-    ax2.spines['left'].set_visible(False)
-
-    # Generate frame
-    ax2.clear()
-    ax2.set_ylim(ylim2)  
-
-    #Plot population
-    pop_h = pop_data["population_h_log10"].to_list()
-    pop_z = pop_data["population_z_log10"].to_list()
-    # values = pop_data.loc[pop_data.index[frame]].to_list()
-    ax2.plot(pop_h, c = "green")
-    ax2.plot(pop_z, c = "red")
-    plt.show()
-
 def generate_geo_bar_frame(
         frame:int, 
         ax1:any,
@@ -152,8 +121,9 @@ def generate_geo_bar_frame(
         xlim:tuple[float], 
         ylim1:tuple[float],
         ylim2:tuple[float], 
-        geo_data:list[GeoDataFrame], 
-        pop_data:list[DataFrame]
+        geo_data:GeoDataFrame, 
+        pop_data:list[DataFrame],
+        progress_text:Text
     ) -> None:
 
     # Clear and redraw progress annotation
@@ -163,7 +133,7 @@ def generate_geo_bar_frame(
     ax1.set_xlim(xlim)
     ax1.set_ylim(ylim1)
     ax1.axis('off')        
-    ax1.annotate(progress, xy=(0.5, -0.05), xycoords='axes fraction', fontsize=12, ha='center')        
+    progress_text.set_text(progress)   
 
     ax2.clear()
     ax2.set_ylim(ylim2)  
@@ -192,8 +162,9 @@ def generate_geo_line_frame(
         ylim1:tuple[float, float],        
         xlim2:tuple[float, float],
         ylim2:tuple[float, float], 
-        geo_data:list[GeoDataFrame], 
-        pop_data:list[DataFrame]
+        geo_data:GeoDataFrame, 
+        pop_data:list[DataFrame],
+        progress_text:Text
     ) -> None:
 
     # Clear and redraw progress annotation
@@ -202,9 +173,8 @@ def generate_geo_line_frame(
     ax1.clear()
     ax1.set_xlim(xlim1)
     ax1.set_ylim(ylim1)
-    ax1.axis('off')        
-    ax1.annotate(progress, xy=(0.5, -0.05), xycoords='axes fraction', fontsize=12, ha='center')        
-
+    ax1.axis('off')                   
+    progress_text.set_text(progress)
     #Clear and redraw line plot axes
     ax2.clear()
     ax2.set_xlim(xlim2)
@@ -226,8 +196,8 @@ def generate_geo_line_frame(
     ax2.plot(pop_z, c = "red")
     print(progress)
 
-def make_geo_line_animation(geo_data:list[GeoDataFrame], pop_data:list[DataFrame], fps:float, duration:float) -> animation.FuncAnimation:
-    (fig, ax1, ax2, xlim1, ylim1, xlim2, ylim2) = setup_geo_line_plot(geo_data, pop_data)    
+def make_geo_animation(geo_data:GeoDataFrame, fps:float, duration:float) -> animation.FuncAnimation:
+    (fig, ax1, xlim, ylim) = setup_geo_plot(geo_data)    
     total_frames = fps * duration + 1
     match config.TIME_PROGRESSION:
         case "lin":
@@ -240,15 +210,15 @@ def make_geo_line_animation(geo_data:list[GeoDataFrame], pop_data:list[DataFrame
     # Create the animation
     mov = animation.FuncAnimation(
         fig=fig,
-        func=generate_geo_line_frame,        
-        fargs=(ax1, ax2, xlim1, ylim1, xlim2, ylim2, geo_data, pop_data),
+        func=generate_geo_frame,        
+        fargs=(ax1, xlim, ylim, geo_data),
         frames=key_frames,
         repeat=False,
         interval=1000
     )
     return mov
 
-def make_geo_bar_animation(geo_data:list[GeoDataFrame], pop_data:list[DataFrame], fps:float, duration:float) -> animation.FuncAnimation:
+def make_geo_bar_animation(geo_data:GeoDataFrame, pop_data:list[DataFrame], fps:float, duration:float) -> animation.FuncAnimation:
     (fig, ax1, ax2, xlim, ylim1, ylim2) = setup_geo_bar_plot(geo_data, pop_data)    
     total_frames = fps * duration + 1
     match config.TIME_PROGRESSION:
@@ -270,27 +240,27 @@ def make_geo_bar_animation(geo_data:list[GeoDataFrame], pop_data:list[DataFrame]
     )
     return mov
 
-# def make_geo_animation(data:list[GeoDataFrame], fps:float, duration:float) -> animation.FuncAnimation:
-#     fig, ax, xlim, ylim = setup_plot(data)    
-#     total_frames = fps * duration + 1
-#     match config.TIME_PROGRESSION:
-#         case "lin":
-#             key_frames = calculate_key_frames_linear(len(data.keys())-1, total_frames)
-#         case "log":
-#             key_frames = calculate_key_frames_logarithmic(len(data.keys())-1, total_frames)
-#         case _:
-#             raise ValueError(TIME_PROGRESSION_ERROR_MESSAGE)
+def make_geo_line_animation(geo_data:GeoDataFrame, pop_data:list[DataFrame], fps:float, duration:float) -> animation.FuncAnimation:
+    (fig, ax1, ax2, xlim1, ylim1, xlim2, ylim2, progress_text) = setup_geo_line_plot(geo_data, pop_data)    
+    total_frames = fps * duration + 1
+    match config.TIME_PROGRESSION:
+        case "lin":
+            key_frames = calculate_key_frames_linear(len(geo_data.keys())-1, total_frames)
+        case "log":
+            key_frames = calculate_key_frames_logarithmic(len(geo_data.keys())-1, total_frames)
+        case _:
+            raise ValueError(TIME_PROGRESSION_ERROR_MESSAGE)
        
-#     # Create the animation
-#     mov = animation.FuncAnimation(
-#         fig=fig,
-#         func=generate_geo_frame,        
-#         fargs=(ax, xlim, ylim, data),
-#         frames=key_frames,
-#         repeat=False,
-#         interval=1000
-#     )
-#     return mov
+    # Create the animation
+    mov = animation.FuncAnimation(
+        fig=fig,
+        func=generate_geo_line_frame,        
+        fargs=(ax1, ax2, xlim1, ylim1, xlim2, ylim2, geo_data, pop_data, progress_text),
+        frames=key_frames,
+        repeat=False,
+        interval=1000
+    )
+    return mov
 
 def show_animation() -> None:
     plt.show()
@@ -299,3 +269,4 @@ def save_animation(video:animation.FuncAnimation, filename:str, fps:float) -> No
     writer = animation.PillowWriter(fps=fps)
     video.save(filename, writer=writer)
     #plt.close()
+

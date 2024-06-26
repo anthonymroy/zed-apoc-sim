@@ -72,7 +72,6 @@ def calculate_derived_values(src_df:pd.DataFrame) -> pd.DataFrame:
     ret_df["bit_h"] = ret_df["bit_h"].apply(max, args=(0,))
     ret_df["killed_z"] = (ret_df["population_z"] * ret_df["encounter_chance_z"] * (1 - ret_df["escape_chance_z"])).apply(np.round)
     ret_df["killed_z"] = ret_df["killed_z"].apply(max, args=(0,))
-    # ret_df["migration_z"] = (calculate_migration(ret_df) * ret_df["encounter_chance_z"] * (1 - ret_df["escape_chance_z"])).apply(np.round)
     ret_df["migration_z"] = calculate_migration(ret_df).apply(np.round)
     return ret_df
 
