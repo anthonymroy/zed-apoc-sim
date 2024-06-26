@@ -7,6 +7,7 @@
 - Add zombie decay
 - Add human migration
 - Add UI
+- Have more control over geo plot colors
 - Plot total populations
 - Add migration options
 - Add zombie learning
@@ -32,3 +33,4 @@
 - Allow a random initial outbreak [DONE]
 - Make schema for datatypes [DONE]
 - Make initial outbreak customizable [DONE]
+- Report initial and ending values to screen [DONE]

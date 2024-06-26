@@ -25,7 +25,12 @@ def df_from_json(filename:str, index=None) -> DataFrame:
     return DataFrame.from_records(data, index=index)
 
 def sigmoid(x:float, m:float=1, b:float=0) -> float:
-  return 1 / (1 + math.exp(-m*(x-b)))
+    return 1 / (1 + math.exp(-m*(x-b/m)))
+
+def safe_log10(x:float) -> float:
+    if x < 1 :
+        return 0
+    return math.log10(x)
 
 if __name__ == "__main__":
     # For development and testing
