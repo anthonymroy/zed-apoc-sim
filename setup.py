@@ -103,8 +103,8 @@ def rename_population_df(src_df:pd.DataFrame, gdf:gpd.GeoDataFrame):
 
 def main(region) -> tuple[gpd.GeoDataFrame, pd.DataFrame, pd.DataFrame]:
 
-    shape_file = os.path.join(config.SHAPE_DIRECTORY,f"{region}{config.BASE_BORDERS_FILENAME}")
-    neighbors_pathfile = os.path.join(config.DATA_DIRECTORY,f"{region}{config.BASE_NEIGHBORS_FILENAME}")
+    shape_file = os.path.join(config.SHAPE_DIRECTORY,f"{region}{config.SHAPEFILE_FILENAME_SUFFIX}")
+    neighbors_pathfile = os.path.join(config.NEIGHBOR_DIRECTORY,f"{region}{config.NEIGHBORS_FILENAME_SUFFIX}")
 
     if region == "US":
         population_file = config.STATE_POPULATIONS_FILENAME
