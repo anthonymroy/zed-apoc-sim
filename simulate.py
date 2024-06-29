@@ -11,8 +11,7 @@ def outbreak(src_df:pd.DataFrame) -> pd.DataFrame:
     ground_zero = config.OUTBREAK_START
     if ground_zero not in list(ret_df.index):
         ground_zero = random.choice(list(ret_df.index))      
-    #ret_df.at[ground_zero, "population_z"] = round(0.01*ret_df.at[ground_zero, "population_h"]) 
-    ret_df.at[ground_zero, "population_z"] = 2
+    ret_df.at[ground_zero, "population_z"] = 1
     return ret_df
 
 def set_features(index:list) -> pd.DataFrame:
@@ -23,17 +22,16 @@ def set_features(index:list) -> pd.DataFrame:
 
 def set_initial_conditions(src_df:pd.DataFrame, p_df:pd.DataFrame) -> pd.DataFrame:
     ret_df = src_df.copy()
-    ret_df["population_h"] = p_df["POP"]
-    ret_df["escape_chance_h"] = config.INITIAL_ESCAPE_CHANCE_H
-    ret_df["escape_chance_z"] = config.INITIAL_ESCAPE_CHANGE_Z
-    ret_df["border_porosity_z"] = config.BORDER_POROSITY
+    ret_df["population_h"] = p_df["POP"]  
     ret_df = ret_df.fillna(0.0)
     ret_df = outbreak(ret_df)
     return ret_df
 
 def calculate_static_values(src_df:pd.DataFrame, gdf:gpd.GeoDataFrame, b_df:pd.DataFrame) -> pd.DataFrame:
     ret_df = src_df.copy()
+    ret_df["speed_z"] = config.ZED_SPEED * 1.609 * 24 #Convert from mph to km/day
     ret_df["border_length"] = b_df["border_length"]
+    ret_df["border_porosity_z"] = config.BORDER_POROSITY
     ret_df["area"] = gdf["ALAND"] * 1e-6 #km^2 
     ret_df["compactness"] = gdf.area / gdf.geometry.convex_hull.area 
     ret_df["neighbors"] = b_df["neighbors"] 
@@ -53,25 +51,36 @@ def calculate_migration(src_df:pd.DataFrame) -> pd.Series:
             conc_n = ret_df.at[name_n,"population_density_z"]
             fraction = neighbor["fraction"]
             rate_n = my_porosity * fraction / my_compactness
-            total += rate_n * (conc_n - my_conc) * my_area
+            total += int(rate_n * (conc_n - my_conc) * my_area)
         ret_df.at[my_name,"migration"] = int(total)
+    ret_df["migration"].clip(lower= -1*ret_df["population_z"])
     return ret_df["migration"]
 
+def calculate_escape_chance(cumulative_encounters, initial, final, m, b):
+    scale = final - initial
+    #ret = cumulative_encounters.apply(utils.sigmoid, args=(m, b))
+    ret = utils.sigmoid(cumulative_encounters, m, b)
+    ret = initial + scale*ret
+    return ret
+    
 def calculate_derived_values(src_df:pd.DataFrame) -> pd.DataFrame:    
     ret_df = src_df.copy()
-    learning_asymptote = 0.98 
+    learning_asymptote = 0.99 
     ret_df["population_density_h"] = ret_df["population_h"] / ret_df["area"]
     ret_df["population_density_z"] = ret_df["population_z"] / ret_df["area"]
-    ret_df["encounter_chance_h"] = ret_df["population_z"] / (ret_df["population_h"] + ret_df["population_z"])
-    ret_df["encounter_chance_h"] = ret_df["encounter_chance_h"].fillna(0.0) #Fix for if total population is 0
-    ret_df["encounter_chance_z"] = ret_df["population_h"] / (ret_df["population_h"] + ret_df["population_z"])
-    ret_df["encounter_chance_z"] = ret_df["encounter_chance_z"].fillna(0.0) #Fix for if total population is 0
-    ret_df["escape_chance_h"] = learning_asymptote*ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(1.1, 2))
-    ret_df["escape_chance_z"] = 1 - 0.5*learning_asymptote*ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(1, 4))
-    ret_df["bit_h"] = (ret_df["population_h"] * ret_df["encounter_chance_h"] * (1 - ret_df["escape_chance_h"])).apply(np.round)
-    ret_df["bit_h"] = ret_df["bit_h"].apply(max, args=(0,))
-    ret_df["killed_z"] = (ret_df["population_z"] * ret_df["encounter_chance_z"] * (1 - ret_df["escape_chance_z"])).apply(np.round)
-    ret_df["killed_z"] = ret_df["killed_z"].apply(max, args=(0,))
+    speed_z = config.ZED_SPEED * 1.609 * 24 #Convert from mph to km/day
+    area_z = speed_z * 1 * config.ENCOUNTER_DISTANCE * 3.048e-4 #km^2
+    ret_df["encounters"] = ret_df["population_density_h"] * area_z * ret_df["population_z"]
+    #ret_df["escape_chance_h"] = learning_asymptote*ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(1.1, 2))
+    #ret_df["escape_chance_z"] = 1 - learning_asymptote*ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(1, 4))
+    ret_df["escape_chance_h"] = ret_df["cumulative_encounters_h"].apply(
+        calculate_escape_chance, args=(config.INITIAL_ESCAPE_CHANCE_H, config.FINAL_ESCAPE_CHANCE_H, 1, 1))
+    ret_df["escape_chance_z"] = ret_df["cumulative_encounters_h"].apply(
+        calculate_escape_chance, args=(config.INITIAL_ESCAPE_CHANCE_Z, config.FINAL_ESCAPE_CHANCE_Z, 1, 2))
+    ret_df["bit_h"] = (ret_df["encounters"] * (1 - ret_df["escape_chance_h"])).apply(np.round)   
+    ret_df["bit_h"] = ret_df["bit_h"].clip(lower=0, upper=ret_df["population_h"])
+    ret_df["killed_z"] = (ret_df["encounters"] * (1 - ret_df["escape_chance_z"])).apply(np.round)
+    ret_df["killed_z"] = ret_df["killed_z"].clip(lower=0, upper=ret_df["population_z"])
     ret_df["migration_z"] = calculate_migration(ret_df).apply(np.round)
     return ret_df
 
@@ -88,8 +97,10 @@ def time_step(src_df:pd.DataFrame) -> pd.DataFrame:
     ret_df["population_h"] = ret_df["population_h"] - ret_df["bit_h"]
     ret_df["population_h"] = ret_df["population_h"].apply(max, args=(0,))
     ret_df["population_z"] = ret_df["population_z"] + ret_df["bit_h"] - ret_df["killed_z"] + ret_df["migration_z"]
-    ret_df["population_z"] = ret_df["population_z"].apply(max, args=(0,))    
-    ret_df["cumulative_encounters_h"] += ret_df["encounter_chance_h"]
+    ret_df["population_z"] = ret_df["population_z"].apply(max, args=(0,)) 
+    populated_mask = ret_df[ret_df["population_h"] > 0]
+    ret_df.loc[populated_mask.index,"cumulative_encounters_h"] += \
+        ret_df.loc[populated_mask.index,"encounters"] / ret_df.loc[populated_mask.index,"population_h"]
     ret_df = calculate_derived_values(ret_df)
     return ret_df
 
