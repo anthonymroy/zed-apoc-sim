@@ -1,28 +1,44 @@
 import ast
-from geopandas import GeoSeries
 import pandas as pd
 from pandera import Check, Column, DataFrameSchema, Index
 
 SimulationSchema = DataFrameSchema(
     {
-        "population_h": Column(float, coerce=True, nullable=False, required=True),
-        "population_z": Column(float, coerce=True, nullable=False, required=True),
-        "population_density_h": Column(float, coerce=True, nullable=False, required=True),
-        "population_density_z": Column(float, coerce=True, nullable=False, required=True),
-        "encounter_chance_h": Column(float, coerce=True, nullable=False, required=True),
-        "encounter_chance_z": Column(float, coerce=True, nullable=False, required=True),
-        "escape_chance_h": Column(float, coerce=True, nullable=False, required=True),
-        "escape_chance_z": Column(float, coerce=True, nullable=False, required=True),
-        "cumulative_encounters_h": Column(float, coerce=True, nullable=False, required=True),
-        "bit_h": Column(float, coerce=True, nullable=False, required=True),
-        "killed_z": Column(float, coerce=True, nullable=False, required=True),
-        "migration_z": Column(float, coerce=True, nullable=False, required=True),
-        "border_porosity_z": Column(float, coerce=True, nullable=False, required=True),
-        "border_length": Column(float, coerce=True, nullable=False, required=True),
-        "area": Column(float, coerce=True, nullable=False, required=True),
-        "compactness": Column(float, coerce=True, nullable=False, required=True),
+        "population_h": Column(float, coerce=True, nullable=False, required=True,
+                               description="Number of people in the region"),
+        "population_z": Column(float, coerce=True, nullable=False, required=True,
+                               description="Number of zeds in the region"),
+        "population_density_h": Column(float, coerce=True, nullable=False, required=True,
+                                       description="Number of people / km^2"),
+        "population_density_z": Column(float, coerce=True, nullable=False, required=True,
+                                       description="Number of zeds / km^2"),
+        "encounter_chance_h": Column(float, coerce=True, nullable=False, required=True,
+                                     description="Each person's probability of encountering a zed"),
+        "encounter_chance_z": Column(float, coerce=True, nullable=False, required=True, 
+                                     description="Each zed's probability of encountering a person"),
+        "escape_chance_h": Column(float, coerce=True, nullable=False, required=True, 
+                                  description="Probability of a person escaping an encounter uninfected"),
+        "escape_chance_z": Column(float, coerce=True, nullable=False, required=True,
+                                  description="Probability of a zed escaping an encounter undead"),
+        "cumulative_encounters_h": Column(float, coerce=True, nullable=False, required=True,
+                                          description="Average number of encouters a person has had"),
+        "bit_h": Column(float, coerce=True, nullable=False, required=True,
+                        description="Number of people infected"),
+        "killed_z": Column(float, coerce=True, nullable=False, required=True,
+                           description="Number of zeds killed"),
+        "migration_z": Column(float, coerce=True, nullable=False, required=True,
+                              description="Number of zeds that have moved across regions"),
+        "border_porosity_z": Column(float, coerce=True, nullable=False, required=True,
+                                    description="Weight factor for zed movement across regions"),
+        "border_length": Column(float, coerce=True, nullable=False, required=True,
+                                description="Perimeter of region (km)"),
+        "area": Column(float, coerce=True, nullable=False, required=True,
+                       description="Land area of region (km^2)"),
+        "compactness": Column(float, coerce=True, nullable=False, required=True,
+                              description="area / convex hull"),
         "neighbors": Column(object, coerce=True, nullable=True, required=True,
-                            checks=[Check(lambda x: validate_record(x, NeighborSchema, nullable=True,), element_wise=True)])
+                            checks=[Check(lambda x: validate_record(x, NeighborSchema, nullable=True,), element_wise=True)],
+                            description="List of neighboring regions")
     },
     index=Index(str)
 )

@@ -37,11 +37,14 @@ def generate_neighborfile(gdf:gpd.GeoDataFrame, filepath:str) -> pd.DataFrame:
     data = []
     for name1 in gdf.index:        
         neighbors = []
-        my_border_length = utils.get_border_length(gdf.geometry[name1])
+        # Shapefile polygons are 1:100 km
+        my_border_length = 100 * utils.get_border_length(gdf.geometry[name1])
         for name2 in gdf.index:
             if name1 == name2:
                 continue
-            shared_border_length = utils.get_shared_border_length(gdf.geometry[name1], gdf.geometry[name2])
+            # Shapefile polygons are 1:100 km
+            shared_border_length = 100 * utils.get_shared_border_length(gdf.geometry[name1],
+                                                                         gdf.geometry[name2])
             if shared_border_length > 0:
                 neighbors.append({
                     "neighbor_name":name2,
@@ -138,9 +141,6 @@ def main(region) -> tuple[gpd.GeoDataFrame, pd.DataFrame, pd.DataFrame]:
     else:
         population_df = generate_populationfile(population_file, region)
     population_df = sch.clean_df(population_df, sch.PopulationSchema)
-    #population_df["state"] = population_df["state"].apply(add_leading_zeros, 2)
-    #if "county" in population_df.keys():
-            #population_df["county"] = population_df["county"].apply(add_leading_zeros, 3)
 
     if region == "US":
         neighbors_df = filter_states_for_contiguous(neighbors_df)
