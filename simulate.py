@@ -34,7 +34,7 @@ def set_initial_conditions(src_df:pd.DataFrame, p_df:pd.DataFrame) -> pd.DataFra
 def calculate_static_values(src_df:pd.DataFrame, gdf:gpd.GeoDataFrame, b_df:pd.DataFrame) -> pd.DataFrame:
     ret_df = src_df.copy()
     ret_df["border_length"] = b_df["border_length"]
-    ret_df["area"] = gdf.area 
+    ret_df["area"] = gdf["ALAND"] * 1e-6 #km^2 
     ret_df["compactness"] = gdf.area / gdf.geometry.convex_hull.area 
     ret_df["neighbors"] = b_df["neighbors"] 
     return ret_df

@@ -6,7 +6,7 @@ OUTBREAK_START = "Wayne"
 INITIAL_ESCAPE_CHANCE_H = 0.7
 INITIAL_ESCAPE_CHANGE_Z = 0.75
 BORDER_POROSITY = 0.1
-DAYS_TO_SIMULATE = 300
+DAYS_TO_SIMULATE = 500
 VIDEO_FILENAME = "Zombie Apocalypse Simulation.gif"
 PLOT_TITLE = "Zombie Apocalypse Simulator"
 FPS = 10
@@ -17,11 +17,13 @@ VMIN = 0
 VMAX = 1
 
 DATA_DIRECTORY = "./data"
-SHAPE_DIRECTORY = os.path.join(DATA_DIRECTORY,"shapes")
+SHAPE_DIRECTORY = os.path.join(DATA_DIRECTORY,"shapefiles")
+NEIGHBOR_DIRECTORY = os.path.join(DATA_DIRECTORY,"neighbors")
+POPULATION_DIRECTORY = os.path.join(DATA_DIRECTORY,"populations")
 
-BASE_BORDERS_FILENAME = "_borders.shp"
-BASE_NEIGHBORS_FILENAME = "_neighbors.json"
-STATE_POPULATIONS_FILENAME = os.path.join(DATA_DIRECTORY,"state_populations.csv")
-COUNTY_POPULATIONS_FILENAME = os.path.join(DATA_DIRECTORY,"county_populations.csv")
+SHAPEFILE_FILENAME_SUFFIX = "_shapefile.shp"
+NEIGHBORS_FILENAME_SUFFIX = "_neighbors.json"
+STATE_POPULATIONS_FILENAME = os.path.join(POPULATION_DIRECTORY,"state_populations.csv")
+COUNTY_POPULATIONS_FILENAME = os.path.join(POPULATION_DIRECTORY,"county_populations.csv")
 
 LAST_SIMULATION_FILENAME = "last_simulation.sim"

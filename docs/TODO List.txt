@@ -6,12 +6,12 @@
 - Add human learning [DONE]
 - Add zombie decay
 - Add human migration
-- Add UI
+- Add UI and saved values
 - Have more control over geo plot colors
 - Plot total populations
 - Add migration options
 - Add zombie learning
-- Add carriers / incubation period
+- Add carriers and incubation period
 - Ad immune humans
 - Add human-to-human effects
 - Use gun data
@@ -24,11 +24,12 @@
 - Add human and zombie movements speeds
 - Add temperature effects
 - Figure out nation border effects
+- Figure out units [DONE]
 - Adjust encounter chance to be dependent on density and movement speed
 - Adjust migration to be dependent on movement speed
 - Add variable time step
 - Add fight vs flight humans
-- Add tests
+- Add unit tests
 - Include instructions on how to use runtime arguements [DONE]
 - Allow a random initial outbreak [DONE]
 - Make schema for datatypes [DONE]

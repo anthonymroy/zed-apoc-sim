@@ -21,13 +21,13 @@ def download_shapefile(filename:str, region_text:str) -> gpd.GeoDataFrame:
 
 def download_state_shapefile(filename:str) -> gpd.GeoDataFrame:
     print(f"Can not find {filename}. Downloading now...")
-    gdf = pygris.states()
+    gdf = pygris.states(cb=True, resolution="500k")
     gdf.to_file(filename, )
     return gdf
 
 def download_county_shapefile(filename:str, state) -> gpd.GeoDataFrame:
     print(f"Can not find {filename}. Downloading now...")
-    gdf = pygris.counties(state=state)
+    gdf = pygris.counties(state=state, cb=True, resolution="500k")
     gdf.to_file(filename, driver='ESRI Shapefile')
     return gdf
 
@@ -37,11 +37,14 @@ def generate_neighborfile(gdf:gpd.GeoDataFrame, filepath:str) -> pd.DataFrame:
     data = []
     for name1 in gdf.index:        
         neighbors = []
-        my_border_length = utils.get_border_length(gdf.geometry[name1])
+        # Shapefile polygons are 1:100 km
+        my_border_length = 100 * utils.get_border_length(gdf.geometry[name1])
         for name2 in gdf.index:
             if name1 == name2:
                 continue
-            shared_border_length = utils.get_shared_border_length(gdf.geometry[name1], gdf.geometry[name2])
+            # Shapefile polygons are 1:100 km
+            shared_border_length = 100 * utils.get_shared_border_length(gdf.geometry[name1],
+                                                                         gdf.geometry[name2])
             if shared_border_length > 0:
                 neighbors.append({
                     "neighbor_name":name2,
@@ -103,8 +106,8 @@ def rename_population_df(src_df:pd.DataFrame, gdf:gpd.GeoDataFrame):
 
 def main(region) -> tuple[gpd.GeoDataFrame, pd.DataFrame, pd.DataFrame]:
 
-    shape_file = os.path.join(config.SHAPE_DIRECTORY,f"{region}{config.BASE_BORDERS_FILENAME}")
-    neighbors_pathfile = os.path.join(config.DATA_DIRECTORY,f"{region}{config.BASE_NEIGHBORS_FILENAME}")
+    shape_file = os.path.join(config.SHAPE_DIRECTORY,f"{region}{config.SHAPEFILE_FILENAME_SUFFIX}")
+    neighbors_pathfile = os.path.join(config.NEIGHBOR_DIRECTORY,f"{region}{config.NEIGHBORS_FILENAME_SUFFIX}")
 
     if region == "US":
         population_file = config.STATE_POPULATIONS_FILENAME
@@ -138,9 +141,6 @@ def main(region) -> tuple[gpd.GeoDataFrame, pd.DataFrame, pd.DataFrame]:
     else:
         population_df = generate_populationfile(population_file, region)
     population_df = sch.clean_df(population_df, sch.PopulationSchema)
-    #population_df["state"] = population_df["state"].apply(add_leading_zeros, 2)
-    #if "county" in population_df.keys():
-            #population_df["county"] = population_df["county"].apply(add_leading_zeros, 3)
 
     if region == "US":
         neighbors_df = filter_states_for_contiguous(neighbors_df)
