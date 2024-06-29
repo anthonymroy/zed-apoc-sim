@@ -21,13 +21,13 @@ def download_shapefile(filename:str, region_text:str) -> gpd.GeoDataFrame:
 
 def download_state_shapefile(filename:str) -> gpd.GeoDataFrame:
     print(f"Can not find {filename}. Downloading now...")
-    gdf = pygris.states()
+    gdf = pygris.states(cb=True, resolution="500k")
     gdf.to_file(filename, )
     return gdf
 
 def download_county_shapefile(filename:str, state) -> gpd.GeoDataFrame:
     print(f"Can not find {filename}. Downloading now...")
-    gdf = pygris.counties(state=state)
+    gdf = pygris.counties(state=state, cb=True, resolution="500k")
     gdf.to_file(filename, driver='ESRI Shapefile')
     return gdf
 

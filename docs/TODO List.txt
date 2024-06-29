@@ -24,6 +24,7 @@
 - Add human and zombie movements speeds
 - Add temperature effects
 - Figure out nation border effects
+- Figure out units
 - Adjust encounter chance to be dependent on density and movement speed
 - Adjust migration to be dependent on movement speed
 - Add variable time step
