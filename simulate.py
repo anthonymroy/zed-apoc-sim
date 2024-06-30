@@ -23,17 +23,18 @@ def set_features(index:list) -> pd.DataFrame:
 def set_initial_conditions(src_df:pd.DataFrame, p_df:pd.DataFrame) -> pd.DataFrame:
     ret_df = src_df.copy()
     ret_df["population_h"] = p_df["POP"]  
-    ret_df = ret_df.fillna(0.0)
+    # Calling infer_objects prevents downcasting FutureWarning
+    ret_df = ret_df.infer_objects(copy=False).fillna(0.0)
     ret_df = outbreak(ret_df)
     return ret_df
 
 def calculate_static_values(src_df:pd.DataFrame, gdf:gpd.GeoDataFrame, b_df:pd.DataFrame) -> pd.DataFrame:
     ret_df = src_df.copy()
-    ret_df["speed_z"] = config.ZED_SPEED * 1.609 * 24 #Convert from mph to km/day
     ret_df["border_length"] = b_df["border_length"]
     ret_df["border_porosity_z"] = config.BORDER_POROSITY
-    ret_df["area"] = gdf["ALAND"] * 1e-6 #km^2 
-    ret_df["compactness"] = gdf.area / gdf.geometry.convex_hull.area 
+    ret_df["area"] = gdf["ALAND"] * 1e-6 #km^2
+    geometry_projected = gdf.geometry.to_crs(epsg=3857) #Projecting the geometry prevents using area warning
+    ret_df["compactness"] = geometry_projected.area / geometry_projected.convex_hull.area  
     ret_df["neighbors"] = b_df["neighbors"] 
     return ret_df
 
@@ -65,14 +66,11 @@ def calculate_escape_chance(cumulative_encounters, initial, final, m, b):
     
 def calculate_derived_values(src_df:pd.DataFrame) -> pd.DataFrame:    
     ret_df = src_df.copy()
-    learning_asymptote = 0.99 
     ret_df["population_density_h"] = ret_df["population_h"] / ret_df["area"]
     ret_df["population_density_z"] = ret_df["population_z"] / ret_df["area"]
     speed_z = config.ZED_SPEED * 1.609 * 24 #Convert from mph to km/day
     area_z = speed_z * 1 * config.ENCOUNTER_DISTANCE * 3.048e-4 #km^2
     ret_df["encounters"] = ret_df["population_density_h"] * area_z * ret_df["population_z"]
-    #ret_df["escape_chance_h"] = learning_asymptote*ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(1.1, 2))
-    #ret_df["escape_chance_z"] = 1 - learning_asymptote*ret_df["cumulative_encounters_h"].apply(utils.sigmoid, args=(1, 4))
     ret_df["escape_chance_h"] = ret_df["cumulative_encounters_h"].apply(
         calculate_escape_chance, args=(config.INITIAL_ESCAPE_CHANCE_H, config.FINAL_ESCAPE_CHANCE_H, 1, 1))
     ret_df["escape_chance_z"] = ret_df["cumulative_encounters_h"].apply(

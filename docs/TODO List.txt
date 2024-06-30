@@ -8,7 +8,7 @@
 - Add human migration
 - Add UI and saved values
 - Have more control over geo plot colors
-- Plot total populations
+- Plot total populations [DONE]
 - Add migration options
 - Add zombie learning
 - Add carriers and incubation period
@@ -21,12 +21,13 @@
 - Enable parallel FEM
 - Add a vaccine
 - Add a cure
-- Add human and zombie movements speeds
+- Add human movements speeds
+- Add zombie movements speeds [DONE]
 - Add temperature effects
-- Figure out nation border effects
+- Figure out region border effects
 - Figure out units [DONE]
-- Adjust encounter chance to be dependent on density and movement speed
-- Adjust migration to be dependent on movement speed
+- Adjust encounter chance to be dependent on density and movement speed [DONE]
+- Adjust migration to be dependent on movement speed [IN PROGRESS]
 - Add variable time step
 - Add fight vs flight humans
 - Add unit tests
