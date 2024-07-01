@@ -49,7 +49,6 @@ def generate_neighborfile(gdf:gpd.GeoDataFrame, filepath:str) -> pd.DataFrame:
                 neighbors.append({
                     "neighbor_name":name2,
                     "shared_border_length":shared_border_length,
-                    "fraction": shared_border_length/my_border_length
                 })
         data.append({
             "name": name1,

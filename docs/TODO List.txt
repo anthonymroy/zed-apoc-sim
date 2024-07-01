@@ -5,10 +5,9 @@
 - Implement counties for a single state [DONE]
 - Add human learning [DONE]
 - Add zombie decay
-- Add human migration
 - Add UI and saved values
-- Have more control over geo plot colors
-- Plot total populations
+- Have more control over geo plot colors [ON DECK]
+- Plot total populations [DONE]
 - Add migration options
 - Add zombie learning
 - Add carriers and incubation period
@@ -21,12 +20,13 @@
 - Enable parallel FEM
 - Add a vaccine
 - Add a cure
-- Add human and zombie movements speeds
+- Add human movements speeds and migration
+- Add zombie movements speeds [DONE]
 - Add temperature effects
-- Figure out nation border effects
+- Figure out region border effects
 - Figure out units [DONE]
-- Adjust encounter chance to be dependent on density and movement speed
-- Adjust migration to be dependent on movement speed
+- Adjust encounter chance to be dependent on density and movement speed [DONE]
+- Adjust migration to be dependent on movement speed [DONE]
 - Add variable time step
 - Add fight vs flight humans
 - Add unit tests
@@ -35,3 +35,4 @@
 - Make schema for datatypes [DONE]
 - Make initial outbreak customizable [DONE]
 - Report initial and ending values to screen [DONE]
+- Make scenerios from movies [DONE]
