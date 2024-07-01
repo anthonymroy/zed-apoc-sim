@@ -1,10 +1,36 @@
 from geopandas import GeoDataFrame
 import math
+from matplotlib.colors import ListedColormap
+import matplotlib.pyplot as plt
+import numpy as np
 from pandas import DataFrame
 
-ZAS_COLORMAP = [[0.6, 0.0, 0.1, 1.0],
-                [1.0, 1.0, 0.7, 1.0],
-                [0.0, 0.4, 0.2, 1.0]]
+CUSTOM_COLORMAP = [[0.6, 0.0, 0.1, 1.0],
+                   [0.8, 0.5, 0.4, 1.0],
+                   [1.0, 1.0, 0.7, 1.0],
+                   [0.5, 0.7, 0.4, 1.0],
+                   [0.0, 0.4, 0.2, 1.0]]
+
+custom_cmap = ListedColormap(CUSTOM_COLORMAP, name="zas")
+
+def plot_examples(colormaps):
+    """
+    Helper function to plot data with associated colormap.
+    """
+    data = np.array([
+        [1, 2, 3, 4, 5],
+        [2, 3, 4, 5, 1],
+        [3, 4, 5, 1, 2],
+        [4, 5, 1, 2, 3],
+        [5, 1, 2, 3, 4]
+    ])
+    n = len(colormaps)
+    fig, axs = plt.subplots(1, n, figsize=(n * 2 + 2, 3),
+                            layout='constrained', squeeze=False)
+    for [ax, cmap] in zip(axs.flat, colormaps):
+        psm = ax.pcolormesh(data, cmap=cmap, rasterized=True, vmin=1, vmax=5)
+        fig.colorbar(psm, ax=ax)
+    plt.show()
 
 def generate_2d_colormap(basemap, alpha_slices):    
     import copy
@@ -39,6 +65,5 @@ def generate_geo_plot_data_for_2d_colormap(src_data_list:list[DataFrame], gdf:Ge
     return ret_df
 
 if __name__ == "__main__":
-    test_cm = generate_2d_colormap(ZAS_COLORMAP, 3)
-    print(test_cm)
+    plot_examples([custom_cmap])
     junk = 1

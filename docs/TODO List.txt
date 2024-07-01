@@ -1,12 +1,12 @@
 - Add arguments [DONE]
 - Save simulations [DONE]
 - Seperate sim and animation [DONE]
-- Make main.py the only file to directly reference non-pathfile conf variables.
+- Make main.py the only file to directly reference non-pathfile conf variables. [ON DECK]
 - Implement counties for a single state [DONE]
 - Add human learning [DONE]
 - Add zombie decay
-- Add UI and saved values
-- Have more control over geo plot colors [ON DECK]
+- Add UI and saved values [ON DECK]
+- Have more control over geo plot colors [IN PROGRESS]
 - Plot total populations [DONE]
 - Add migration options
 - Add zombie learning
@@ -35,4 +35,4 @@
 - Make schema for datatypes [DONE]
 - Make initial outbreak customizable [DONE]
 - Report initial and ending values to screen [DONE]
-- Make scenerios from movies [DONE]
+- Make scenerios from movies
