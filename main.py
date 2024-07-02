@@ -5,12 +5,11 @@ import os
 import pickle
 import setup
 import simulate
-import visualization as viz
+import visualization.visualization as viz
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Simulate a zombie outbreak")    
-    parser.add_argument("region", default=config.DEFAULT_REGION,
-                           help="The two-letter region to simulate. 'US' is the default value")
+    parser.add_argument("region", help="The two-letter region to simulate.")
     parser.add_argument("--sim", dest="sim_only", action="store_true", default=False,
                            help="Flag to run only the simulation without visualization")
     parser.add_argument("--viz", dest="viz_only", action="store_true", default=False,
@@ -37,7 +36,7 @@ if __name__ == "__main__":
 
     if not my_args.sim_only:            
         plot_data = viz.generate_geo_plot_data(time_data, shape_gdf)
-        # viz.make_geo_image(plot_data, 0)
+        # viz.make_geo_image(plot_data, 10)
         # viz.make_bar_image(plot_data, time_totals, 0)
         # viz.make_line_image(plot_data, time_totals, 0)
         # mov = viz.make_geo_animation(plot_data, config.FPS, config.ANIMATION_DURATION) 

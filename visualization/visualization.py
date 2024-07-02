@@ -7,15 +7,42 @@ import matplotlib.pyplot as plt
 from matplotlib.text import Text
 from pandas import DataFrame
 import utils
+from visualization.custom_colormap import generate_custom_colormap
+
 
 TIME_PROGRESSION_ERROR_MESSAGE = "TIME_PROGRESSION must be 'lin' or 'log'"
+
+BASE_COLORMAP = [[0.6, 0.0, 0.2, 1.0],
+                [0.8, 0.8, 0.2, 1.0],
+                [0.0, 0.6, 0.2, 1.0]]
+
+CUSTOM_COLORMAP = generate_custom_colormap(BASE_COLORMAP, config.COLOR_SLICES, config.ALPHA_SLICES)
+
+# def generate_geo_plot_data(src_data_list:list[DataFrame], gdf:GeoDataFrame) -> GeoDataFrame:
+#     data = []
+#     for step in range(len(src_data_list)):
+#         pop_h = src_data_list[step]["population_h"]
+#         pop_z = src_data_list[step]["population_z"]
+#         datum = pop_h / (pop_h + pop_z)
+#         datum.name = step
+#         data.append(datum)
+#     data_df = DataFrame(data).T
+#     ret_df = GeoDataFrame(        
+#         data = data_df,
+#         geometry = gdf.geometry,
+#         crs = gdf.crs
+#     )
+#     return ret_df
 
 def generate_geo_plot_data(src_data_list:list[DataFrame], gdf:GeoDataFrame) -> GeoDataFrame:
     data = []
     for step in range(len(src_data_list)):
         pop_h = src_data_list[step]["population_h"]
         pop_z = src_data_list[step]["population_z"]
-        datum = pop_h / (pop_h + pop_z)
+        pop_d = src_data_list[step]["population_d"]
+        value = (config.COLOR_SLICES * pop_h.apply(utils.safe_log10) / (pop_h + 10*pop_z + 1).apply(utils.safe_log10)).apply(math.floor)
+        level = (config.ALPHA_SLICES * (0.1*pop_d).apply(utils.safe_log10) / (pop_h + pop_z + pop_d + 1).apply(utils.safe_log10)).apply(math.floor)
+        datum = level*config.COLOR_SLICES + value
         datum.name = step
         data.append(datum)
     data_df = DataFrame(data).T
@@ -107,11 +134,16 @@ def generate_geo_frame(frame:int, ax:any, xlim:tuple[float], ylim:tuple[float], 
     # Plot boundaries
     _ = data.boundary.plot(ax=ax, edgecolor='black', linewidth=0.2)
 
-    # Normalize colormap    
-    norm = plt.Normalize(vmin=config.VMIN, vmax=config.VMAX)
-
     # Plot the data for the current year
-    data.plot(ax=ax, column=frame, legend=False, cmap=config.COLORMAP, norm=norm)
+    data.plot(
+        ax=ax,
+        column=frame,
+        legend=False,
+        cmap=CUSTOM_COLORMAP,
+        rasterized=True,
+        vmin=0,
+        vmax=config.COLOR_SLICES*config.ALPHA_SLICES
+    )
     print(progress)
 
 def generate_geo_bar_frame(
@@ -141,11 +173,16 @@ def generate_geo_bar_frame(
     # Plot geo boundaries
     _ = geo_data.boundary.plot(ax=ax1, edgecolor='black', linewidth=0.2)
 
-    # Normalize colormap    
-    norm = plt.Normalize(vmin=config.VMIN, vmax=config.VMAX)
-
     # Plot the data for the current year
-    geo_data.plot(ax=ax1, column=frame, legend=False, cmap=config.COLORMAP, norm=norm)
+    geo_data.plot(
+        ax=ax1,
+        column=frame,
+        legend=False,
+        cmap=CUSTOM_COLORMAP,
+        rasterized=True,
+        vmin=0,
+        vmax=config.COLOR_SLICES*config.ALPHA_SLICES
+    )
 
     #Plot population
     columns = pop_data.columns.to_list()
@@ -183,11 +220,16 @@ def generate_geo_line_frame(
     # Plot geo boundaries
     _ = geo_data.boundary.plot(ax=ax1, edgecolor='black', linewidth=0.2)
 
-    # Normalize colormap    
-    norm = plt.Normalize(vmin=config.VMIN, vmax=config.VMAX)
-
     # Plot the geo data for the current day
-    geo_data.plot(ax=ax1, column=frame, legend=False, cmap=config.COLORMAP, norm=norm)
+    geo_data.plot(
+        ax=ax1,
+        column=frame,
+        legend=False,
+        cmap=CUSTOM_COLORMAP,
+        rasterized=True,
+        vmin=0,
+        vmax=config.COLOR_SLICES*config.ALPHA_SLICES
+    )
 
     #Plot population
     pop_h = pop_data["population_h_log10"].to_list()[:frame]
@@ -219,7 +261,7 @@ def make_geo_animation(geo_data:GeoDataFrame, fps:float, duration:float) -> anim
     return mov
 
 def make_geo_bar_animation(geo_data:GeoDataFrame, pop_data:list[DataFrame], fps:float, duration:float) -> animation.FuncAnimation:
-    (fig, ax1, ax2, xlim, ylim1, ylim2) = setup_geo_bar_plot(geo_data, pop_data)    
+    (fig, ax1, ax2, xlim, ylim1, ylim2, progress_text) = setup_geo_bar_plot(geo_data, pop_data)    
     total_frames = fps * duration + 1
     match config.TIME_PROGRESSION:
         case "lin":
@@ -233,7 +275,7 @@ def make_geo_bar_animation(geo_data:GeoDataFrame, pop_data:list[DataFrame], fps:
     mov = animation.FuncAnimation(
         fig=fig,
         func=generate_geo_bar_frame,        
-        fargs=(ax1, ax2, xlim, ylim1, ylim2, geo_data, pop_data),
+        fargs=(ax1, ax2, xlim, ylim1, ylim2, geo_data, pop_data, progress_text),
         frames=key_frames,
         repeat=False,
         interval=1000
@@ -268,5 +310,3 @@ def show_animation() -> None:
 def save_animation(video:animation.FuncAnimation, filename:str, fps:float) -> None:
     writer = animation.PillowWriter(fps=fps)
     video.save(filename, writer=writer)
-    #plt.close()
-

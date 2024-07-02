@@ -63,8 +63,7 @@ ShapeSchema = DataFrameSchema(
 NeighborSchema = DataFrameSchema(
     {
         "neighbor_name": Column(str, coerce=True, nullable=False, required=True),
-        "shared_border_length": Column(float, coerce=True, nullable=False, required=True),
-        "fraction": Column(float, coerce=True, nullable=True, required=True)
+        "shared_border_length": Column(float, coerce=True, nullable=False, required=True)
     }
 )
 

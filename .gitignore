@@ -24,6 +24,7 @@ venv.bak/
 
 # Video files
 *.gif
+!demo.gif
 
 # Personal scratch file
 scratch.txt
