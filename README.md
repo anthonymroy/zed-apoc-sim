@@ -1,6 +1,8 @@
 # zed-apoc-sim
 Hobby project of simulating a zombie apocalypse in the United States
 
+![](demo.gif)
+
 ## Quick Start
 `python -m virtualenv venv`
 

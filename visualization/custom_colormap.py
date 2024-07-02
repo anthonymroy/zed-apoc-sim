@@ -5,13 +5,34 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pandas import DataFrame
 
-CUSTOM_COLORMAP = [[0.6, 0.0, 0.1, 1.0],
-                   [0.8, 0.5, 0.4, 1.0],
-                   [1.0, 1.0, 0.7, 1.0],
-                   [0.5, 0.7, 0.4, 1.0],
-                   [0.0, 0.4, 0.2, 1.0]]
+BASE_COLORMAP = [[1.0, 0.0, 0.2],
+                [0.8, 0.8, 0.2],
+                [0.0, 1.0, 0.2]]
 
-custom_cmap = ListedColormap(CUSTOM_COLORMAP, name="zas")
+def interpolate_rgb(x, arr0, arr1):
+    ret = []
+    for i in range(len(arr0)):
+        y = arr0[i] + x * (arr1[i] - arr0[i])
+        ret.append(y)
+    return ret
+
+def generate_custom_colormap(basemap, color_slices = 5, alpha_slices = 4):    
+    arr = np.array(basemap)
+    color_step = float(arr.shape[0] - 1) / (color_slices - 1)
+    alpha_step = 0.6 / (alpha_slices - 1)
+    colors = []    
+    for j in range(alpha_slices):
+        alpha = 1 - j*alpha_step
+        for i in range(color_slices - 1):
+            x = i*color_step
+            x0 = math.floor(x)
+            x1 = math.ceil(x)
+            arr0 = np.concatenate((alpha*arr[x0][:3],[arr[x0][3]]))
+            arr1 = np.concatenate((alpha*arr[x1][:3],[arr[x1][3]]))
+            color = interpolate_rgb(x-x0, arr0, arr1)
+            colors.append(color)
+        colors.append(np.concatenate((alpha*arr[-1][:3],[arr[-1][3]])))
+    return ListedColormap(colors, name="zas")
 
 def plot_examples(colormaps):
     """
@@ -65,5 +86,6 @@ def generate_geo_plot_data_for_2d_colormap(src_data_list:list[DataFrame], gdf:Ge
     return ret_df
 
 if __name__ == "__main__":
-    plot_examples([custom_cmap])
+    #plot_examples([custom_cmap])
+    cl = generate_custom_colormap(BASE_COLORMAP, 15)
     junk = 1

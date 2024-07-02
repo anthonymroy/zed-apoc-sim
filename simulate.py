@@ -12,8 +12,9 @@ def outbreak(src_df:pd.DataFrame) -> pd.DataFrame:
     ret_df = src_df.copy()
     ground_zero = config.OUTBREAK_START
     if ground_zero not in list(ret_df.index):
-        ground_zero = random.choice(list(ret_df.index))      
-    ret_df.at[ground_zero, "population_z"] = 1
+        ground_zero = random.choice(list(ret_df.index))   
+    ret_df.at[ground_zero, "population_z"] = 0.001*ret_df.at[ground_zero, "population_h"]   
+    #ret_df.at[ground_zero, "population_z"] = 1
     return ret_df
 
 def set_features(index:list) -> pd.DataFrame:
@@ -46,7 +47,7 @@ def calculate_migration(src_df:pd.DataFrame) -> pd.Series:
         for neighbor in src_df.at[my_name,"neighbors"]:
             neighbor_name = neighbor["neighbor_name"]
             neighbor_conc = (src_df.at[neighbor_name,"population_z"] - src_df.at[neighbor_name,"killed_z"]) / src_df.at[neighbor_name,"area"]
-            neighbor_border_zeds = my_conc * src_df.at[neighbor_name,"border_area"]            
+            neighbor_border_zeds = my_conc * src_df.at[neighbor_name,"border_area_z"]            
             shared_border_length = neighbor["shared_border_length"]
             my_fraction = shared_border_length / src_df.at[my_name,"border_length"]
             neighbor_fraction = shared_border_length / src_df.at[neighbor_name,"border_length"]
@@ -75,9 +76,9 @@ def calculate_derived_values(src_df:pd.DataFrame) -> pd.DataFrame:
     area_z = speed_z * 1 * config.ENCOUNTER_DISTANCE * 3.048e-4 #km^2
     ret_df["encounters"] = ret_df["population_density_h"] * area_z * ret_df["population_z"]
     ret_df["escape_chance_h"] = ret_df["cumulative_encounters_h"].apply(
-        calculate_escape_chance, args=(config.INITIAL_ESCAPE_CHANCE_H, config.FINAL_ESCAPE_CHANCE_H, 1, 1))
+        calculate_escape_chance, args=(config.INITIAL_ESCAPE_CHANCE_H, config.FINAL_ESCAPE_CHANCE_H, config.ESCAPE_LEARNING_RATE_H, config.ESCAPE_LEARNING_THRESHOLD_H))
     ret_df["escape_chance_z"] = ret_df["cumulative_encounters_h"].apply(
-        calculate_escape_chance, args=(config.INITIAL_ESCAPE_CHANCE_Z, config.FINAL_ESCAPE_CHANCE_Z, 1, 10))
+        calculate_escape_chance, args=(config.INITIAL_ESCAPE_CHANCE_Z, config.FINAL_ESCAPE_CHANCE_Z,  config.COMBAT_LEARNING_RATE_H, config.COMBAT_LEARNING_THRESHOLD_H))
     ret_df["bit_h"] = (ret_df["encounters"] * (1 - ret_df["escape_chance_h"])).apply(np.round)   
     ret_df["bit_h"] = ret_df["bit_h"].clip(lower=0, upper=ret_df["population_h"])
     ret_df["killed_z"] = (ret_df["encounters"] * (1 - ret_df["escape_chance_z"])).apply(np.round)
