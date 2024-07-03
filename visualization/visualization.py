@@ -18,22 +18,6 @@ BASE_COLORMAP = [[0.6, 0.0, 0.2, 1.0],
 
 CUSTOM_COLORMAP = generate_custom_colormap(BASE_COLORMAP, config.COLOR_SLICES, config.ALPHA_SLICES)
 
-# def generate_geo_plot_data(src_data_list:list[DataFrame], gdf:GeoDataFrame) -> GeoDataFrame:
-#     data = []
-#     for step in range(len(src_data_list)):
-#         pop_h = src_data_list[step]["population_h"]
-#         pop_z = src_data_list[step]["population_z"]
-#         datum = pop_h / (pop_h + pop_z)
-#         datum.name = step
-#         data.append(datum)
-#     data_df = DataFrame(data).T
-#     ret_df = GeoDataFrame(        
-#         data = data_df,
-#         geometry = gdf.geometry,
-#         crs = gdf.crs
-#     )
-#     return ret_df
-
 def generate_geo_plot_data(src_data_list:list[DataFrame], gdf:GeoDataFrame) -> GeoDataFrame:
     data = []
     for step in range(len(src_data_list)):
