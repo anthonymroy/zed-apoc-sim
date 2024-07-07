@@ -1,7 +1,10 @@
 import json
 import math
+from matplotlib.colors import ListedColormap
+import numpy as np
 from pandas import DataFrame
 import shapely.geometry as sg
+
 
 def get_border_length(polygon:sg.Polygon) -> float:
     return polygon.length
@@ -52,6 +55,13 @@ def calculate_key_frames_logarithmic(data_length:int, number_of_frames:int) -> l
         key_frames.append(round(math.pow(frame_step_size, i)))
     key_frames.append(data_length-1)
     return key_frames
+
+def interpolate_rgb(x, arr0, arr1):
+    ret = []
+    for i in range(len(arr0)):
+        y = arr0[i] + x * (arr1[i] - arr0[i])
+        ret.append(y)
+    return ret
 
 if __name__ == "__main__":
     # For development and testing

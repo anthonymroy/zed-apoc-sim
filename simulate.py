@@ -6,12 +6,14 @@ import pandas as pd
 import random 
 import utils
 
-def outbreak(src_df:pd.DataFrame, ground_zero:str) -> pd.DataFrame:
+def outbreak(src_df:pd.DataFrame, ground_zero:str, zero_patients:float) -> pd.DataFrame:
     ret_df = src_df.copy()
     if ground_zero not in list(ret_df.index):
-        ground_zero = random.choice(list(ret_df.index))   
-    #ret_df.at[ground_zero, "population_z"] = 0.001*ret_df.at[ground_zero, "population_h"]   
-    ret_df.at[ground_zero, "population_z"] = 1
+        ground_zero = random.choice(list(ret_df.index))
+    if zero_patients < 1:
+        ret_df.at[ground_zero, "population_z"] = zero_patients*ret_df.at[ground_zero, "population_h"]
+    else:
+        ret_df.at[ground_zero, "population_z"] = zero_patients       
     return ret_df
 
 def set_features(index:list) -> pd.DataFrame:
@@ -20,12 +22,12 @@ def set_features(index:list) -> pd.DataFrame:
     df.set_index("index", inplace=True)    
     return df
 
-def set_initial_conditions(src_df:pd.DataFrame, p_df:pd.DataFrame, ground_zero:str) -> pd.DataFrame:
+def set_initial_conditions(src_df:pd.DataFrame, p_df:pd.DataFrame, settings:Settings) -> pd.DataFrame:
     ret_df = src_df.copy()
     ret_df["population_h"] = p_df["POP"]  
     # Calling infer_objects prevents downcasting FutureWarning
     ret_df = ret_df.infer_objects(copy=False).fillna(0.0)
-    ret_df = outbreak(ret_df, ground_zero)
+    ret_df = outbreak(ret_df, settings.outbreak_region, settings.outbreak_size)
     return ret_df
 
 def calculate_static_values(
@@ -111,7 +113,7 @@ def initialize(
     ret_df = set_features(list(shape_gdf.index))
     zed_travel_distance = settings.zed_speed*1.609*24*1 #Convert from mph to km in 1 day
     ret_df = calculate_static_values(ret_df, shape_gdf, border_df, zed_travel_distance)    
-    ret_df = set_initial_conditions(ret_df, population_df, settings.outbreak_region)
+    ret_df = set_initial_conditions(ret_df, population_df, settings)
     ret_df = sch.clean_df(ret_df, sch.SimulationSchema)
     ret_df = calculate_derived_values(ret_df, settings)
     return ret_df        

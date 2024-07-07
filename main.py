@@ -5,7 +5,7 @@ import os
 import pickle
 import setup
 import simulate
-import visualization.visualize as viz
+import visualize as viz
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Simulate a zombie outbreak")    
@@ -44,16 +44,7 @@ if __name__ == "__main__":
             viz.show_frame(plot_data, time_totals, my_settings)
         if my_settings.make_animation:
             mov = viz.make_animation(plot_data, time_totals, my_settings)
-            viz.save_animation(mov, my_settings)
-        # 
-        # viz.make_geo_image(plot_data, 10, my_settings)
-        # viz.make_bar_image(plot_data, time_totals, 0)
-        # viz.make_line_image(plot_data, time_totals, 0)
-         
-        # mov = viz.make_geo_animation(plot_data, my_settings) 
-        # mov = viz.make_geo_bar_animation(plot_data, time_totals, config.FPS, config.ANIMATION_DURATION)    
-        # mov = viz.make_geo_line_animation(plot_data, time_totals, my_settings)  
-        
+            viz.save_animation(mov, my_settings)        
     
     print("Zombie Apocalypse Simulation complete:")
     print(f"Initial population: {round(pow(10,time_totals.at[0,'population_h_log10'])):,d}")

@@ -4,11 +4,29 @@ import math
 import matplotlib.animation as animation
 from matplotlib.colors import ListedColormap
 import matplotlib.pyplot as plt
+import numpy as np
 from pandas import DataFrame
 import utils
-from visualization.custom_colormap import generate_custom_colormap
 
 TIME_PROGRESSION_ERROR_MESSAGE = "TIME_PROGRESSION must be 'lin' or 'log'"
+
+def generate_custom_colormap(basemap, color_slices = 5, alpha_slices = 4):    
+    arr = np.array(basemap)
+    color_step = float(arr.shape[0] - 1) / (color_slices - 1)
+    alpha_step = 0.7 / (alpha_slices - 1)
+    colors = []    
+    for j in range(alpha_slices):
+        alpha = 1 - j*alpha_step
+        for i in range(color_slices - 1):
+            x = i*color_step
+            x0 = math.floor(x)
+            x1 = math.ceil(x)
+            arr0 = np.concatenate((alpha*arr[x0][:3],[arr[x0][3]]))
+            arr1 = np.concatenate((alpha*arr[x1][:3],[arr[x1][3]]))
+            color = utils.interpolate_rgb(x-x0, arr0, arr1)
+            colors.append(color)
+        colors.append(np.concatenate((alpha*arr[-1][:3],[arr[-1][3]])))
+    return ListedColormap(colors)
 
 def generate_geo_plot_data(src_data_list:list[DataFrame], gdf:GeoDataFrame, settings:Settings) -> GeoDataFrame:
     data = []

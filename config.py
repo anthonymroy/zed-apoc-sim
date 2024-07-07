@@ -4,6 +4,7 @@ class Settings:
     def __init__(self):
         self.simulation_region = "OH"
         self.outbreak_region = "Hocking"
+        self.outbreak_size = 2 #Number of zeds to start with. Enter a number bewteen 0-1 to make the start a fraction of the existing population
         self.initial_escape_chance_h = 0.25
         self.final_escape_chance_h = 0.99
         self.initial_escape_chance_z = 0.99
