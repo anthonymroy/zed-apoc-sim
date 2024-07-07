@@ -1,4 +1,4 @@
-import config
+from config import Filepaths, Settings
 from data.list_of_contiguous_states import CONTIGUOUS_STATES
 import data.schema as sch
 import geopandas as gpd
@@ -103,29 +103,35 @@ def rename_population_df(src_df:pd.DataFrame, gdf:gpd.GeoDataFrame):
     ret_df.set_index("NAME", inplace=True)
     return ret_df
 
-def main(region) -> tuple[gpd.GeoDataFrame, pd.DataFrame, pd.DataFrame]:
+def main(settings:Settings, filepaths:Filepaths) -> tuple[gpd.GeoDataFrame, pd.DataFrame, pd.DataFrame]:
 
-    shape_file = os.path.join(config.SHAPE_DIRECTORY,f"{region}{config.SHAPEFILE_FILENAME_SUFFIX}")
-    neighbors_pathfile = os.path.join(config.NEIGHBOR_DIRECTORY,f"{region}{config.NEIGHBORS_FILENAME_SUFFIX}")
+    shape_file = os.path.join(
+        filepaths.shape_directory,
+        f"{settings.simulation_region}{filepaths.shapefile_filename_suffix}"
+    )
+    neighbors_pathfile = os.path.join(
+        filepaths.neighbor_directory,
+        f"{settings.simulation_region}{filepaths.neighbors_filename_suffix}"
+    )
 
-    if region == "US":
-        population_file = config.STATE_POPULATIONS_FILENAME
-    elif region in [state["short_name"] for state in CONTIGUOUS_STATES]:        
-        population_file = config.COUNTY_POPULATIONS_FILENAME
+    if settings.simulation_region == "US":
+        population_file = filepaths.state_population_filename
+    elif settings.simulation_region in [state["short_name"] for state in CONTIGUOUS_STATES]:        
+        population_file = filepaths.county_populations_filename
     else:
         raise ValueError(REGION_ERROR_MESSAGE)
         
     if os.path.exists(shape_file):
         shape_gdf = gpd.read_file(shape_file)
     else:
-        shape_gdf = download_shapefile(shape_file, region)    
+        shape_gdf = download_shapefile(shape_file, settings.simulation_region)    
     shape_gdf.set_index("NAME", inplace=True)
     shape_gdf = sch.clean_df(shape_gdf, sch.ShapeSchema)
 
-    if region == "US":
+    if settings.simulation_region == "US":
         shape_gdf = filter_states_for_contiguous(shape_gdf)
-    elif region in [state["short_name"] for state in CONTIGUOUS_STATES]:
-        shape_gdf = filter_counties_for_state(shape_gdf, region, "STATEFP")
+    elif settings.simulation_region in [state["short_name"] for state in CONTIGUOUS_STATES]:
+        shape_gdf = filter_counties_for_state(shape_gdf, settings.simulation_region, "STATEFP")
     else:
         raise ValueError(REGION_ERROR_MESSAGE)
 
@@ -138,14 +144,14 @@ def main(region) -> tuple[gpd.GeoDataFrame, pd.DataFrame, pd.DataFrame]:
     if os.path.exists(population_file):
         population_df = pd.read_csv(population_file, index_col="NAME")
     else:
-        population_df = generate_populationfile(population_file, region)
+        population_df = generate_populationfile(population_file, settings.simulation_region)
     population_df = sch.clean_df(population_df, sch.PopulationSchema)
 
-    if region == "US":
+    if settings.simulation_region == "US":
         neighbors_df = filter_states_for_contiguous(neighbors_df)
         population_df = filter_states_for_contiguous(population_df)
-    elif region in [state["short_name"] for state in CONTIGUOUS_STATES]:
-        population_df = filter_counties_for_state(population_df, region, "state")        
+    elif settings.simulation_region in [state["short_name"] for state in CONTIGUOUS_STATES]:
+        population_df = filter_counties_for_state(population_df, settings.simulation_region, "state")        
         population_df = rename_population_df(population_df, shape_gdf)
     else:
         raise ValueError(REGION_ERROR_MESSAGE)    
@@ -153,4 +159,6 @@ def main(region) -> tuple[gpd.GeoDataFrame, pd.DataFrame, pd.DataFrame]:
     return (shape_gdf, neighbors_df, population_df)
         
 if __name__ == "__main__":
-    main("CA")
+    my_settings = Settings()
+    my_filepaths = Filepaths()
+    main(my_settings, my_filepaths)

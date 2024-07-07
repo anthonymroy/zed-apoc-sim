@@ -1,7 +1,10 @@
 import json
 import math
+from matplotlib.colors import ListedColormap
+import numpy as np
 from pandas import DataFrame
 import shapely.geometry as sg
+
 
 def get_border_length(polygon:sg.Polygon) -> float:
     return polygon.length
@@ -31,6 +34,34 @@ def safe_log10(x:float) -> float:
     if x < 1 :
         return 0
     return math.log10(x)
+
+def calculate_key_frames_linear(data_length:int, number_of_frames:int) -> list[int]:
+    '''
+    Gets a linear distribution of the desired number_of_frames between [0, data_length]
+    '''
+    frame_step_size = float(data_length) / number_of_frames
+    key_frames = []
+    for i in range(number_of_frames):
+        key_frames.append(round(i*frame_step_size))
+    return key_frames
+
+def calculate_key_frames_logarithmic(data_length:int, number_of_frames:int) -> list[int]:
+    '''
+    Gets a logarithmic distribution of the desired number_of_frames between [0, data_length]
+    '''    
+    key_frames = [0]
+    frame_step_size = math.pow(data_length, 1/number_of_frames)
+    for i in range(number_of_frames):
+        key_frames.append(round(math.pow(frame_step_size, i)))
+    key_frames.append(data_length-1)
+    return key_frames
+
+def interpolate_rgb(x, arr0, arr1):
+    ret = []
+    for i in range(len(arr0)):
+        y = arr0[i] + x * (arr1[i] - arr0[i])
+        ret.append(y)
+    return ret
 
 if __name__ == "__main__":
     # For development and testing

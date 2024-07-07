@@ -11,7 +11,7 @@
 - Add migration options
 - Add zombie learning
 - Add carriers and incubation period
-- Ad immune humans
+- Add immune humans
 - Add human-to-human effects
 - Use gun data
 - Use school data
@@ -41,3 +41,5 @@
 - Revistit learning model [ON DECK]
 - Fix population bar graphs
 - Add y-label to line graph and have the animation scale in x
+- Fix Bar graph scale [ON DECK]
+- More info in text report [ON DECK]
