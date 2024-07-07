@@ -1,11 +1,11 @@
 - Add arguments [DONE]
 - Save simulations [DONE]
 - Seperate sim and animation [DONE]
-- Make main.py the only file to directly reference non-pathfile conf variables. [IN PROGRESS]
+- Make main.py the only file to directly reference non-pathfile conf variables. [DONE]
 - Implement counties for a single state [DONE]
 - Add human learning [DONE]
 - Add zombie decay
-- Add UI and saved values [ON DECK]
+- Add UI and saved values [IN PROGRESS]
 - Have more control over geo plot colors [DONE]
 - Plot total populations [DONE]
 - Add migration options
@@ -41,5 +41,5 @@
 - Revistit learning model [ON DECK]
 - Fix population bar graphs
 - Add y-label to line graph and have the animation scale in x
-- Fix Bar graph scale [ON DECK]
-- More info in text report [ON DECK]
+- Fix Bar graph scale [IN PROGRESS]
+- More info in text report [IN PROGRESS]
