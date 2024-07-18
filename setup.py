@@ -21,7 +21,9 @@ def download_shapefile(filename:str, region_text:str) -> gpd.GeoDataFrame:
 
 def download_state_shapefile(filename:str) -> gpd.GeoDataFrame:
     print(f"Can not find {filename}. Downloading now...")
-    gdf = pygris.states(cb=True, resolution="500k")
+    #Remove below for national-counties
+    #gdf = pygris.states(cb=True, resolution="500k")
+    gdf = pygris.counties(cb=True, resolution="500k")
     gdf.to_file(filename, )
     return gdf
 
@@ -85,7 +87,7 @@ def generate_populationfile(filename, region_text) -> pd.DataFrame:
 def filter_states_for_contiguous(src_df):
     ret_df = src_df.copy()
     to_keep = [state["name"] for state in CONTIGUOUS_STATES]
-    ret_df = ret_df[ret_df.index.isin(to_keep)]
+    ret_df = ret_df[ret_df["STATE_NAME"].isin(to_keep)]
     return ret_df
 
 def filter_counties_for_state(src_df, state_short_name, filter_key):
@@ -115,7 +117,9 @@ def main(settings:Settings, filepaths:Filepaths) -> tuple[gpd.GeoDataFrame, pd.D
     )
 
     if settings.simulation_region == "US":
-        population_file = filepaths.state_population_filename
+        #Remove below for national-counties
+        #population_file = filepaths.state_population_filename
+        population_file = filepaths.county_populations_filename
     elif settings.simulation_region in [state["short_name"] for state in CONTIGUOUS_STATES]:        
         population_file = filepaths.county_populations_filename
     else:
@@ -160,5 +164,6 @@ def main(settings:Settings, filepaths:Filepaths) -> tuple[gpd.GeoDataFrame, pd.D
         
 if __name__ == "__main__":
     my_settings = Settings()
+    my_settings.simulation_region = "US"
     my_filepaths = Filepaths()
     main(my_settings, my_filepaths)

@@ -5,7 +5,7 @@
 - Implement counties for a single state [DONE]
 - Add human learning [DONE]
 - Add zombie decay
-- Add UI and saved values [IN PROGRESS]
+- Add UI and saved values [ON DECK]
 - Have more control over geo plot colors [DONE]
 - Plot total populations [DONE]
 - Add migration options
@@ -36,10 +36,10 @@
 - Make initial outbreak customizable [DONE]
 - Report initial and ending values to screen [DONE]
 - Make scenerios from movies
-- Make plots configurable
+- Make plots configurable [DONE]
 - Make reported data configurable (after adding UI)
 - Revistit learning model [ON DECK]
 - Fix population bar graphs
 - Add y-label to line graph and have the animation scale in x
-- Fix Bar graph scale [IN PROGRESS]
-- More info in text report [IN PROGRESS]
+- Fix Bar graph scale [ON DECK]
+- More info in text report [ON DECK]
