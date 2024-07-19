@@ -2,8 +2,8 @@ import os
 
 class Settings:
     def __init__(self):
-        self.simulation_region = "OH"
-        self.outbreak_region = "Hocking"
+        # self.simulation_region = "OH"
+        self.outbreak_region = "06071"
         self.outbreak_size = 2 #Number of zeds to start with. Enter a number bewteen 0-1 to make the start a fraction of the existing population
         self.initial_escape_chance_h = 0.25
         self.final_escape_chance_h = 0.99
@@ -49,8 +49,12 @@ class Filepaths:
         self.shape_directory = os.path.join(self.data_directory,"shapefiles")
         self.neighbor_directory = os.path.join(self.data_directory,"neighbors")
         self.population_directory = os.path.join(self.data_directory,"populations")
-        self.shapefile_filename_suffix = "_shapefile.shp"
-        self.neighbors_filename_suffix = "_neighbors.json"
-        self.state_population_filename = os.path.join(self.population_directory,"state_populations.csv")
+       # self.counties_shapefile_filename_suffix = "_shapefile.shp"
+       # self.counties_neighbors_filename_suffix = "_neighbors.json"        
+        self.county_shapefile_filename = "counties_shapefile.shp"
+        self.state_shapefile_filename = "states_shapefile.shp"
+        self.county_neighbors_filename = "counties_neighbors.json"
+        self.state_neighbors_filename = "states_neighbors.json"
+       # self.state_population_filename = os.path.join(self.population_directory,"state_populations.csv")
         self.county_populations_filename = os.path.join(self.population_directory,"county_populations.csv")
         self.last_simulation_filename = os.path.join(self.data_directory,"last_simulation.sim")

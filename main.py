@@ -9,7 +9,7 @@ import visualize as viz
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Simulate a zombie outbreak")    
-    parser.add_argument("region", help="The two-letter region to simulate.")
+    #parser.add_argument("region", help="The two-letter region to simulate.")
     parser.add_argument("--sim", dest="sim_only", action="store_true", default=False,
                            help="Flag to run only the simulation without visualization")
     parser.add_argument("--viz", dest="viz_only", action="store_true", default=False,
@@ -21,9 +21,9 @@ if __name__ == "__main__":
     my_filepaths = Filepaths()
     my_args = parse_arguments()
 
-    my_settings.simulation_region = my_args.region.upper()
+    # my_settings.simulation_region = my_args.region.upper()
 
-    shape_gdf, border_df, population_df = setup.main(my_settings, my_filepaths)
+    shape_gdf, border_df, population_df = setup.main(my_filepaths)
     
     if my_args.viz_only:
         if not os.path.exists(my_filepaths.last_simulation_filename):

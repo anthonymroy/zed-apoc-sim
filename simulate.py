@@ -24,7 +24,8 @@ def set_features(index:list) -> pd.DataFrame:
 
 def set_initial_conditions(src_df:pd.DataFrame, p_df:pd.DataFrame, settings:Settings) -> pd.DataFrame:
     ret_df = src_df.copy()
-    ret_df["population_h"] = p_df["POP"]  
+    for index in ret_df.index:
+        ret_df.at[index,"population_h"] = p_df.at[index,"POP"]  
     # Calling infer_objects prevents downcasting FutureWarning
     ret_df = ret_df.infer_objects(copy=False).fillna(0.0)
     ret_df = outbreak(ret_df, settings.outbreak_region, settings.outbreak_size)
@@ -38,6 +39,7 @@ def calculate_static_values(
     ) -> pd.DataFrame:
     
     ret_df = src_df.copy()
+    ret_df["name"] = gdf["NAME"]
     ret_df["border_length"] = b_df["border_length"]
     ret_df["area"] = gdf["ALAND"] * 1e-6 #km^2
     ret_df["border_area_z"] = (ret_df["border_length"]*distance_z).clip(upper= ret_df["area"])
@@ -46,23 +48,23 @@ def calculate_static_values(
 
 def calculate_migration(src_df:pd.DataFrame) -> pd.Series:
     ret = pd.Series(index=src_df.index)
-    for my_name in ret.index:
+    for my_id in ret.index:
         total = 0        
-        my_conc = (src_df.at[my_name,"population_z"] - src_df.at[my_name,"killed_z"]) / src_df.at[my_name,"area"]        
-        for neighbor in src_df.at[my_name,"neighbors"]:
-            neighbor_name = neighbor["neighbor_name"]
-            neighbor_conc = (src_df.at[neighbor_name,"population_z"] - src_df.at[neighbor_name,"killed_z"]) / src_df.at[neighbor_name,"area"]
-            neighbor_border_zeds = my_conc * src_df.at[neighbor_name,"border_area_z"]            
+        my_conc = (src_df.at[my_id,"population_z"] - src_df.at[my_id,"killed_z"]) / src_df.at[my_id,"area"]        
+        for neighbor in src_df.at[my_id,"neighbors"]:
+            neighbor_id = neighbor["neighbor_id"]
+            neighbor_conc = (src_df.at[neighbor_id,"population_z"] - src_df.at[neighbor_id,"killed_z"]) / src_df.at[neighbor_id,"area"]
+            neighbor_border_zeds = my_conc * src_df.at[neighbor_id,"border_area_z"]            
             shared_border_length = neighbor["shared_border_length"]
-            my_fraction = shared_border_length / src_df.at[my_name,"border_length"]
-            neighbor_fraction = shared_border_length / src_df.at[neighbor_name,"border_length"]
-            my_border_zeds = my_conc * my_fraction * src_df.at[my_name,"border_area_z"]
-            neighbor_border_zeds = neighbor_conc * neighbor_fraction * src_df.at[neighbor_name,"border_area_z"]
+            my_fraction = shared_border_length / src_df.at[my_id,"border_length"]
+            neighbor_fraction = shared_border_length / src_df.at[neighbor_id,"border_length"]
+            my_border_zeds = my_conc * my_fraction * src_df.at[my_id,"border_area_z"]
+            neighbor_border_zeds = neighbor_conc * neighbor_fraction * src_df.at[neighbor_id,"border_area_z"]
             base_migration = (neighbor_border_zeds - my_border_zeds) / 2 
             if base_migration != 0:
                 rate = abs(neighbor_conc - my_conc)/(neighbor_conc + my_conc)
                 total += int(rate*base_migration)
-        ret[my_name] = total    
+        ret[my_id] = total    
     if(sum(ret) != 0):
         raise RuntimeError("Round-off error. Migration sum does not equal zero")
     return ret
@@ -109,10 +111,9 @@ def initialize(
         population_df:pd.DataFrame,
         settings:Settings
     ) -> pd.DataFrame:
-
     ret_df = set_features(list(shape_gdf.index))
     zed_travel_distance = settings.zed_speed*1.609*24*1 #Convert from mph to km in 1 day
-    ret_df = calculate_static_values(ret_df, shape_gdf, border_df, zed_travel_distance)    
+    ret_df = calculate_static_values(ret_df, shape_gdf, border_df, zed_travel_distance)  
     ret_df = set_initial_conditions(ret_df, population_df, settings)
     ret_df = sch.clean_df(ret_df, sch.SimulationSchema)
     ret_df = calculate_derived_values(ret_df, settings)
@@ -163,6 +164,6 @@ if __name__ == "__main__":
     from config import Filepaths
     my_settings = Settings()
     my_filepaths = Filepaths()
-    shape_gdf, border_df, population_df = setup.main(my_settings, my_filepaths)
+    shape_gdf, border_df, population_df = setup.main(my_filepaths)
     initial_df = initialize(shape_gdf, border_df, population_df, my_settings)
     print(initial_df.loc[initial_df.index[0]])
