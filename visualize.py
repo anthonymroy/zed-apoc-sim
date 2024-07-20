@@ -35,7 +35,9 @@ def generate_geo_plot_data(src_data_list:list[DataFrame], gdf:GeoDataFrame, sett
         pop_z = src_data_list[step]["population_z"]
         pop_d = src_data_list[step]["population_d"]
         value = (settings.color_slices * pop_h.apply(utils.safe_log10) / (pop_h + pop_z + 1).apply(utils.safe_log10)).apply(math.floor)
-        level = (settings.alpha_slices * (0.1*pop_d).apply(utils.safe_log10) / (pop_h + pop_z + pop_d + 1).apply(utils.safe_log10)).apply(math.floor)
+        level = (settings.alpha_slices * ((pop_h + pop_z).apply(utils.safe_log10) / 8).apply(min, args=(1,))).apply(math.floor)
+        #level = (settings.alpha_slices * (pop_d.apply(utils.safe_log10) / 8).apply(min, args=(1,))).apply(math.floor)
+        #level = (settings.alpha_slices * (0.1*pop_d).apply(utils.safe_log10) / (pop_h + pop_z + pop_d + 1).apply(utils.safe_log10)).apply(math.floor)
         datum = level*settings.color_slices + value
         datum.name = step
         data.append(datum)
@@ -59,7 +61,7 @@ def get_data_limits(data:DataFrame, feature:str) -> tuple[tuple[float], tuple[fl
 
 def setup_plots_and_limits(plot_types, geo_data, pop_data, settings):
     no_of_plots = len(plot_types)
-    fig, axs = plt.subplots(1, no_of_plots, figsize=(no_of_plots * 2 + 2, 3),
+    fig, axs = plt.subplots(1, no_of_plots, figsize=(no_of_plots * 4 + 4, 6),
                             layout='constrained', squeeze=False)
     _ = fig.suptitle(settings.plot_title, fontdict={'fontsize': '20', 'fontweight' : '2'})
     
@@ -75,6 +77,7 @@ def setup_plots_and_limits(plot_types, geo_data, pop_data, settings):
 def generate_frame(
         frame:int,
         geo_data:GeoDataFrame,
+        plot_borders:GeoDataFrame,
         pop_data:DataFrame,  
         plot_types:list[str],
         plot_axes:any,
@@ -84,7 +87,7 @@ def generate_frame(
     for [ax, bounds, plot_type] in zip(plot_axes.flat, limits, plot_types):
         match plot_type:
             case "geo":                
-                generate_geo_frame(frame, ax, bounds, geo_data, colormap)
+                generate_geo_frame(frame, ax, bounds, geo_data, plot_borders, colormap)
             case "bar":
                 generate_bar_frame(frame, ax, bounds, pop_data)
             case "line":
@@ -114,6 +117,7 @@ def generate_geo_frame(
         ax:any, 
         limits:tuple[tuple[float, float], tuple[float, float]],
         data:list[GeoDataFrame],
+        borders:GeoDataFrame,
         colormap:ListedColormap
         ) -> None:
     # Clear and redraw progress annotation
@@ -126,7 +130,8 @@ def generate_geo_frame(
     ax.annotate(progress, xy=(0.5, -0.05), xycoords='axes fraction', fontsize=12, ha='center')        
 
     # Plot boundaries
-    _ = data.boundary.plot(ax=ax, edgecolor='black', linewidth=0.2)
+    _ = borders.boundary.plot(ax=ax, edgecolor='black', linewidth=0.3)
+    _ = data.boundary.plot(ax=ax, edgecolor='face', linewidth=0.1)
 
     # Plot the data for the current year
     data.plot(
@@ -160,13 +165,13 @@ def generate_line_frame(
     ax.plot(pop_h, c = "green")
     ax.plot(pop_z, c = "red")
 
-def show_frame(geo_data:GeoDataFrame, pop_data:DataFrame, settings:Settings) -> None:
+def show_frame(geo_data:GeoDataFrame, plot_borders:GeoDataFrame, pop_data:DataFrame, settings:Settings) -> None:
     plot_types = settings.get_plot_types()
     (_, axs, limits, colormap) = setup_plots_and_limits(plot_types, geo_data, pop_data, settings)
-    generate_frame(settings.image_frame, geo_data, pop_data, plot_types, axs, limits, colormap)
+    generate_frame(settings.image_frame, geo_data, plot_borders, pop_data, plot_types, axs, limits, colormap)
     plt.show()
 
-def make_animation(geo_data:GeoDataFrame, pop_data:DataFrame, settings:Settings) -> animation.FuncAnimation:
+def make_animation(geo_data:GeoDataFrame, plot_borders:GeoDataFrame, pop_data:DataFrame, settings:Settings) -> animation.FuncAnimation:
     plot_types = settings.get_plot_types()
     (fig, axs, limits, colormap) = setup_plots_and_limits(plot_types, geo_data, pop_data, settings) 
     total_frames = settings.fps * settings.animation_duration + 1
@@ -182,7 +187,7 @@ def make_animation(geo_data:GeoDataFrame, pop_data:DataFrame, settings:Settings)
     mov = animation.FuncAnimation(
         fig=fig,
         func=generate_frame,        
-        fargs=(geo_data, pop_data, plot_types, axs, limits, colormap),
+        fargs=(geo_data, plot_borders, pop_data, plot_types, axs, limits, colormap),
         frames=key_frames,
         repeat=False,
         interval=1000

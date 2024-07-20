@@ -36,14 +36,18 @@ def generate_county_neighborfile(gdf:gpd.GeoDataFrame, neighbor_states_df:pd.Dat
     data = []
     for index in neighbor_states_df.index:
         print(f"Constructing county neighborhoods for {neighbor_states_df.at[index,'name']}") 
-        state_fps_to_keep = [neighbor_states_df.at[index,"state_fp"]]
+        if neighbor_states_df.at[index,'name'] == "Arizona":
+            junk = 1
+        my_state_fps = neighbor_states_df.at[index,"state_fp"]
+        state_fps_to_keep = [my_state_fps]
         for neighbor in neighbor_states_df.at[index,"neighbors"]:
             state_fps_to_keep.append(neighbor["neighbor_state_fp"])
         filtered_gdf = gdf[gdf["STATEFP"].isin(state_fps_to_keep)]
         new_data = generate_neighborfile(filtered_gdf)
-        current_ids = [x['id'] for x in data]
+        #current_ids = [x['id'] for x in data]
         for new_datum in new_data:
-            if new_datum['id'] not in current_ids:
+            if new_datum['state_fp'] == my_state_fps:
+            #if new_datum['id'] not in current_ids:
                 data.append(new_datum)
     return data
 
@@ -53,7 +57,7 @@ def generate_neighborfile(gdf:gpd.GeoDataFrame) -> list[dict]:
     for idx1 in gdf.index:
         neighbors = []        
         my_dict = {
-            "id":gdf.at[idx1, "ID"], 
+            "id":gdf.at[idx1, "id"], 
             "state_fp":gdf.at[idx1, "STATEFP"],
             "name":gdf.at[idx1, "NAME"],
         }
@@ -70,7 +74,7 @@ def generate_neighborfile(gdf:gpd.GeoDataFrame) -> list[dict]:
                                                                          gdf.geometry[idx2])
             if shared_border_length > 0:
                 neighbor_dict = {
-                    "neighbor_id":gdf.at[idx2, "ID"], 
+                    "neighbor_id":gdf.at[idx2, "id"], 
                     "neighbor_state_fp":gdf.at[idx2, "STATEFP"],
                     "neighbor_name":gdf.at[idx2, "NAME"],
                     "shared_border_length":shared_border_length,
@@ -132,7 +136,7 @@ def rename_population_df(src_df:pd.DataFrame, gdf:gpd.GeoDataFrame):
     ret_df.set_index("NAME", inplace=True)
     return ret_df
 
-def main(filepaths:Filepaths) -> tuple[gpd.GeoDataFrame, pd.DataFrame, pd.DataFrame]:    
+def main(filepaths:Filepaths) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame, pd.DataFrame, pd.DataFrame]:    
     state_shape_filepath = os.path.join(filepaths.shape_directory,filepaths.state_shapefile_filename)
     state_neighbors_filepath = os.path.join(filepaths.neighbor_directory,filepaths.state_neighbors_filename)
     counties_shape_filepath = os.path.join(filepaths.shape_directory,filepaths.county_shapefile_filename)
@@ -213,7 +217,7 @@ def main(filepaths:Filepaths) -> tuple[gpd.GeoDataFrame, pd.DataFrame, pd.DataFr
     counties_shape_gdf.set_index("id", inplace=True)
     county_neighbors_df.set_index("id", inplace=True)
     population_df.set_index("id", inplace=True)
-    return (counties_shape_gdf, county_neighbors_df, population_df)
+    return (state_shape_gdf, counties_shape_gdf, county_neighbors_df, population_df)
         
 if __name__ == "__main__":
     my_filepaths = Filepaths()

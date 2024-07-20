@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     # my_settings.simulation_region = my_args.region.upper()
 
-    shape_gdf, border_df, population_df = setup.main(my_filepaths)
+    state_borders, shape_gdf, border_df, population_df = setup.main(my_filepaths)
     
     if my_args.viz_only:
         if not os.path.exists(my_filepaths.last_simulation_filename):
@@ -41,9 +41,9 @@ if __name__ == "__main__":
     if not my_args.sim_only:     
         plot_data = viz.generate_geo_plot_data(time_data, shape_gdf, my_settings)
         if my_settings.show_image:
-            viz.show_frame(plot_data, time_totals, my_settings)
+            viz.show_frame(plot_data, state_borders, time_totals, my_settings)
         if my_settings.make_animation:
-            mov = viz.make_animation(plot_data, time_totals, my_settings)
+            mov = viz.make_animation(plot_data, state_borders, time_totals, my_settings)
             viz.save_animation(mov, my_settings)        
     
     print("Zombie Apocalypse Simulation complete:")

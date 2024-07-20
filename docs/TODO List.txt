@@ -43,3 +43,4 @@
 - Add y-label to line graph and have the animation scale in x
 - Fix Bar graph scale [ON DECK]
 - More info in text report [ON DECK]
+- Find a way to switch between test states and all states

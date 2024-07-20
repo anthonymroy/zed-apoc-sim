@@ -2,20 +2,19 @@ import os
 
 class Settings:
     def __init__(self):
-        # self.simulation_region = "OH"
-        self.outbreak_region = "06071"
-        self.outbreak_size = 2 #Number of zeds to start with. Enter a number bewteen 0-1 to make the start a fraction of the existing population
-        self.initial_escape_chance_h = 0.25
+        self.outbreak_region = "42019"
+        self.outbreak_size = 0.0001 #Number of zeds to start with. Enter a number bewteen 0-1 to make the start a fraction of the existing population
+        self.initial_escape_chance_h = 0.5
         self.final_escape_chance_h = 0.99
         self.initial_escape_chance_z = 0.99
-        self.final_escape_chance_z = 0.05
+        self.final_escape_chance_z = 0.2
         self.escape_learning_rate_h = 1
         self.escape_learning_threshold_h = 1
-        self.combat_learning_rate_h = 0.1
-        self.combat_learning_threshold_h = 2
+        self.combat_learning_rate_h = 0.5
+        self.combat_learning_threshold_h = 10
         self.zed_speed = 1 #mph
         self.encounter_distance = 30 #ft
-        self.simulation_length = 100      
+        self.simulation_length = 365     
         self.video_filename = "Zombie Apocalypse Simulation.gif"
         self.plot_title = "Zombie Apocalypse Simulator"
         self.visuzalize_geo_data = True
@@ -24,7 +23,7 @@ class Settings:
         self.show_image = False
         self.image_frame = 4
         self.make_animation = True
-        self.fps = 4 
+        self.fps = 10 
         self.animation_duration = 15 #seconds
         self.time_progression = "lin" #Must be "lin" or "log"
         self.base_colormap = [[1.0, 0.0, 0.1, 1.0],
