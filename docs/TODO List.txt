@@ -15,9 +15,9 @@
 - Add human-to-human effects
 - Use gun data
 - Use school data
-- Enable cloud runs
+- Enable cloud runs [CANCELLED]
 - Derive mathematical relationship between probability and exponential rate
-- Enable parallel FEM
+- Enable parallel FEM [CANCELLED]
 - Add a vaccine
 - Add a cure
 - Add human movements speeds and migration
@@ -43,4 +43,5 @@
 - Add y-label to line graph and have the animation scale in x
 - Fix Bar graph scale [ON DECK]
 - More info in text report [ON DECK]
-- Find a way to switch between test states and all states
+- Make states vs counties configurable
+- Allow state / region selection

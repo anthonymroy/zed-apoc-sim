@@ -6,14 +6,15 @@ import pandas as pd
 import random 
 import utils
 
-def outbreak(src_df:pd.DataFrame, ground_zero:str, zero_patients:float) -> pd.DataFrame:
+def outbreak(src_df:pd.DataFrame, ground_zero_list:list[str], zero_patients:float) -> pd.DataFrame:
     ret_df = src_df.copy()
-    if ground_zero not in list(ret_df.index):
-        ground_zero = random.choice(list(ret_df.index))
-    if zero_patients < 1:
-        ret_df.at[ground_zero, "population_z"] = zero_patients*ret_df.at[ground_zero, "population_h"]
-    else:
-        ret_df.at[ground_zero, "population_z"] = zero_patients       
+    for ground_zero in ground_zero_list:
+        if ground_zero not in list(ret_df.index):
+            ground_zero = random.choice(list(ret_df.index))
+        if zero_patients < 1:
+            ret_df.at[ground_zero, "population_z"] = zero_patients*ret_df.at[ground_zero, "population_h"]
+        else:
+            ret_df.at[ground_zero, "population_z"] = zero_patients       
     return ret_df
 
 def set_features(index:list) -> pd.DataFrame:

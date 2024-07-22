@@ -33,11 +33,8 @@ def generate_geo_plot_data(src_data_list:list[DataFrame], gdf:GeoDataFrame, sett
     for step in range(len(src_data_list)):
         pop_h = src_data_list[step]["population_h"]
         pop_z = src_data_list[step]["population_z"]
-        pop_d = src_data_list[step]["population_d"]
         value = (settings.color_slices * pop_h.apply(utils.safe_log10) / (pop_h + pop_z + 1).apply(utils.safe_log10)).apply(math.floor)
         level = (settings.alpha_slices * ((pop_h + pop_z).apply(utils.safe_log10) / 8).apply(min, args=(1,))).apply(math.floor)
-        #level = (settings.alpha_slices * (pop_d.apply(utils.safe_log10) / 8).apply(min, args=(1,))).apply(math.floor)
-        #level = (settings.alpha_slices * (0.1*pop_d).apply(utils.safe_log10) / (pop_h + pop_z + pop_d + 1).apply(utils.safe_log10)).apply(math.floor)
         datum = level*settings.color_slices + value
         datum.name = step
         data.append(datum)
@@ -130,8 +127,8 @@ def generate_geo_frame(
     ax.annotate(progress, xy=(0.5, -0.05), xycoords='axes fraction', fontsize=12, ha='center')        
 
     # Plot boundaries
-    _ = borders.boundary.plot(ax=ax, edgecolor='black', linewidth=0.3)
-    _ = data.boundary.plot(ax=ax, edgecolor='face', linewidth=0.1)
+    _ = borders.boundary.plot(ax=ax, edgecolor='black', linewidth=0.3) 
+    _ = data.boundary.plot(ax=ax, antialiased=False, edgecolor='face', linewidth=0.4)
 
     # Plot the data for the current year
     data.plot(

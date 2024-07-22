@@ -37,6 +37,10 @@ if __name__ == "__main__":
         pickle.dump(time_data, open(my_filepaths.last_simulation_filename, 'wb'))
 
     time_totals = simulate.summarize(time_data)
+    print("Zombie Apocalypse Simulation complete:")
+    print(f"Initial population: {round(pow(10,time_totals.at[0,'population_h_log10'])):,d}")
+    print(f"Final population: {round(pow(10,time_totals.at[my_settings.simulation_length,'population_h_log10'])):,d}")
+    print(f"Maximum zed population: {round(max([sum(df['population_z']) for df in time_data])):,d}")
 
     if not my_args.sim_only:     
         plot_data = viz.generate_geo_plot_data(time_data, shape_gdf, my_settings)
@@ -46,8 +50,5 @@ if __name__ == "__main__":
             mov = viz.make_animation(plot_data, state_borders, time_totals, my_settings)
             viz.save_animation(mov, my_settings)        
     
-    print("Zombie Apocalypse Simulation complete:")
-    print(f"Initial population: {round(pow(10,time_totals.at[0,'population_h_log10'])):,d}")
-    print(f"Final population: {round(pow(10,time_totals.at[my_settings.simulation_length,'population_h_log10'])):,d}")
-    print(f"Maximum zed population: {round(max([sum(df['population_z']) for df in time_data])):,d}")
+
     
