@@ -19,12 +19,12 @@ class Settings:
         self.plot_title = "Zombie Apocalypse Simulator"
         self.visuzalize_geo_data = True
         self.visuzalize_bar_data = False
-        self.visuzalize_line_data = True
+        self.visuzalize_line_data = False
         self.show_image = False
         self.image_frame = 4
         self.make_animation = True
-        self.fps = 4 
-        self.animation_duration = 15 #seconds
+        self.fps = 10 
+        self.animation_duration = 20 #seconds
         self.time_progression = "lin" #Must be "lin" or "log"
         self.base_colormap = [[1.0, 0.0, 0.1, 1.0],
                               [0.8, 0.8, 0.2, 1.0],
