@@ -44,4 +44,4 @@
 - Fix Bar graph scale [ON DECK]
 - More info in text report [ON DECK]
 - Make states vs counties configurable
-- Allow state / region selection
+- Allow state / region selection [IN PROGRESS]
