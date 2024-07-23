@@ -13,7 +13,7 @@ TIME_PROGRESSION_ERROR_MESSAGE = "TIME_PROGRESSION must be 'lin' or 'log'"
 def generate_custom_colormap(basemap, color_slices = 5, alpha_slices = 4):    
     arr = np.array(basemap)
     color_step = float(arr.shape[0] - 1) / (color_slices - 1)
-    alpha_step = 0.7 / (alpha_slices - 1)
+    alpha_step = 0.9 / (alpha_slices - 1)
     colors = []    
     for j in range(alpha_slices):
         alpha = 1 - j*alpha_step
@@ -33,11 +33,8 @@ def generate_geo_plot_data(src_data_list:list[DataFrame], gdf:GeoDataFrame, sett
     for step in range(len(src_data_list)):
         pop_h = src_data_list[step]["population_h"]
         pop_z = src_data_list[step]["population_z"]
-        # value = (settings.color_slices * pop_h.apply(utils.safe_log10) / (pop_h + pop_z + 1).apply(utils.safe_log10)).apply(math.floor)
-        # level = (settings.alpha_slices * ((pop_h + pop_z).apply(utils.safe_log10) / 8).apply(min, args=(1,))).apply(math.floor)
-        # datum = level*settings.color_slices + value
-        value = pop_h.apply(utils.safe_log10) / (pop_h + pop_z + 1).apply(utils.safe_log10) #Should be between [0, 1)
-        level = 1 - ((pop_h + pop_z + 1).apply(utils.safe_log10) / 8).apply(min, args=(1,)) #Should be between [0, 1)
+        value = pop_h.apply(utils.safe_log10) / (pop_h + pop_z + 2).apply(utils.safe_log10) #Should be between [0, 1)
+        level = 1 - ((pop_h + pop_z + 2).apply(utils.safe_log10) / 7).apply(min, args=(1,)) #Should be between [0, 1)
         datum = settings.color_slices*(settings.alpha_slices * level).apply(math.floor) + (settings.color_slices * value).apply(math.floor)
         datum.name = step
         data.append(datum)
