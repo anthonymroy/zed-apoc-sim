@@ -2,6 +2,7 @@ import os
 
 class Settings:
     def __init__(self):
+        self.simulation_level = "county"
         self.outbreak_region = ["42007", "42019"]
         self.outbreak_size = 0.0001 #Number of zeds to start with. Enter a number bewteen 0-1 to make the start a fraction of the existing population
         self.initial_escape_chance_h = 0.5
