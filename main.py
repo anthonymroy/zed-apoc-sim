@@ -28,7 +28,7 @@ if __name__ == "__main__":
             my_settings.simulation_resolution = resolution
         case _:
             error_msg = f"Resolution value of {resolution} is not understood. "
-            error_msg += "The value must be 'state' or ''county'"
+            error_msg += "The value must be ['state'] or 'county'"
             raise ValueError(error_msg)
     shape_gdf, border_df, population_df = setup.main(my_settings, my_filepaths)
     

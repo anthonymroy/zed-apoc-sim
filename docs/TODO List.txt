@@ -44,6 +44,6 @@
 - Fix Bar graph scale [ON DECK]
 - More info in text report, feedback overall [ON DECK]
 - Make states vs counties configurable
-- Allow state / region selection [IN PROGRESS]
-- Adjust the number of encounters for the possibility of a zed being killed or a person being previously bitten before the end of the day 
+- Allow state / region selection [DONE]
+- Adjust the number of encounters for the possibility of a zed being killed or a person being previously bitten before the end of the day [IN PROGRESS]
 - Scale population alpha leveling with resolution
