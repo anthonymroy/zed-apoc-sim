@@ -9,20 +9,27 @@ import visualize as viz
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Simulate a zombie outbreak")    
-    #parser.add_argument("region", help="The two-letter region to simulate.")
+    parser.add_argument("resolution", help="Select a resolution of ['state'] or 'county'",
+                        action="store", default="state")
     parser.add_argument("--sim", dest="sim_only", action="store_true", default=False,
                            help="Flag to run only the simulation without visualization")
     parser.add_argument("--viz", dest="viz_only", action="store_true", default=False,
                            help="Flag to visualize the last simulation without rerunning it")
     return parser.parse_args()    
 
-if __name__ == "__main__":
+if __name__ == "__main__":    
     my_settings = Settings()
     my_filepaths = Filepaths()
+    print(f"Starting {my_settings.plot_title}")
     my_args = parse_arguments()
-
-    # my_settings.simulation_region = my_args.region.upper()
-
+    resolution = my_args.resolution.lower()
+    match resolution:
+        case "state" | "county":
+            my_settings.simulation_resolution = resolution
+        case _:
+            error_msg = f"Resolution value of {resolution} is not understood. "
+            error_msg += "The value must be 'state' or ''county'"
+            raise ValueError(error_msg)
     shape_gdf, border_df, population_df = setup.main(my_settings, my_filepaths)
     
     if my_args.viz_only:

@@ -15,7 +15,7 @@ class Settings:
         self.combat_learning_threshold_h = 10
         self.zed_speed = 1 #mph
         self.encounter_distance = 30 #ft
-        self.simulation_length = 365     
+        self.simulation_length = 35     
         self.video_filename = "Zombie Apocalypse Simulation.gif"
         self.plot_title = "Zombie Apocalypse Simulator"
         self.visuzalize_geo_data = True
