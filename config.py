@@ -2,8 +2,9 @@ import os
 
 class Settings:
     def __init__(self):
-        self.outbreak_region = ["42007", "42019"]
-        self.outbreak_size = 0.0001 #Number of zeds to start with. Enter a number bewteen 0-1 to make the start a fraction of the existing population
+        self.simulation_resolution = "state"
+        self.outbreak_region = ["42007", "42019", "42"]
+        self.outbreak_size = 20 #Number of zeds to start with. Enter a number bewteen 0-1 to make the start a fraction of the existing population
         self.initial_escape_chance_h = 0.5
         self.final_escape_chance_h = 0.99
         self.initial_escape_chance_z = 0.99
@@ -14,7 +15,7 @@ class Settings:
         self.combat_learning_threshold_h = 10
         self.zed_speed = 1 #mph
         self.encounter_distance = 30 #ft
-        self.simulation_length = 365     
+        self.simulation_length = 35     
         self.video_filename = "Zombie Apocalypse Simulation.gif"
         self.plot_title = "Zombie Apocalypse Simulator"
         self.visuzalize_geo_data = True

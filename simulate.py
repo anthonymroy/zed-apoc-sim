@@ -187,6 +187,6 @@ if __name__ == "__main__":
     from config import Filepaths
     my_settings = Settings()
     my_filepaths = Filepaths()
-    _, shape_gdf, nieghbors_df, population_df = setup.main(my_filepaths)
+    shape_gdf, nieghbors_df, population_df = setup.main(my_settings, my_filepaths)
     initial_df = initialize(shape_gdf, nieghbors_df, population_df, my_settings)
     print(initial_df.loc[initial_df.index[0]])
