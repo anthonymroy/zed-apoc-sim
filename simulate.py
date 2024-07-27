@@ -99,9 +99,6 @@ def calculate_escape_chance(cumulative_encounters, initial, final, m, b):
     ret = initial + scale*ret
     return ret
 
-# def calculate_final_encounter(P0, rate):
-#     return math.ceil(math.log(0.5/(P0 + 1), rate))
-
 def calculate_decay_encounter(P0, rate):
     n = math.ceil(math.log(0.5/(P0 + 1), rate))
     sum = 0
@@ -140,8 +137,6 @@ def calculate_derived_values(src_df:pd.DataFrame, settings:Settings) -> pd.DataF
     ret_df["encounters"] = calculate_encounters(ret_df, area_z) 
     ret_df["bit_h"] = (ret_df["encounters"] * (1 - ret_df["escape_chance_h"])).apply(np.round)   
     ret_df["bit_h"] = ret_df["bit_h"].clip(lower=0, upper=ret_df["population_h"])    
-    # ret_df["killed_z"] = (ret_df["encounters"] * (1 - ret_df["escape_chance_z"])).apply(np.round)
-    # ret_df["killed_z"] = ret_df["killed_z"].clip(lower=0, upper=ret_df["population_z"])
     ret_df["killed_z"] = ret_df["population_z"] * (1 - ret_df.apply(lambda x: pow(x["escape_chance_z"], x["encounters"]), axis=1))
     ret_df["killed_z"] = ret_df["killed_z"].apply(np.round).clip(lower=0, upper=ret_df["population_z"])
     ret_df["migration_z"] = calculate_migration(ret_df).apply(np.round)    

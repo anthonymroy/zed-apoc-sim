@@ -22,6 +22,8 @@
 - Make reported data configurable (after adding UI)
 - Consider making a stacked bargraph that shows the human, zed, and dead populations of each state
 - Revisit learning model and make sure initial and final rates are accurate
+- Fix warnings
+- Figure out if any pop can go to 0 and make it so if possible
 
 - Add arguments [DONE]
 - Save simulations [DONE]
