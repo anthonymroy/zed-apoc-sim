@@ -1,6 +1,7 @@
 from config import Settings
 import data.schema as sch
 import geopandas as gpd
+import math
 import numpy as np
 import pandas as pd
 import random 
@@ -97,6 +98,22 @@ def calculate_escape_chance(cumulative_encounters, initial, final, m, b):
     ret = utils.sigmoid(cumulative_encounters, m, b)
     ret = initial + scale*ret
     return ret
+
+# def calculate_final_encounter(P0, rate):
+#     return math.ceil(math.log(0.5/(P0 + 1), rate))
+
+def calculate_decay_encounter(P0, rate):
+    n = math.ceil(math.log(0.5/(P0 + 1), rate))
+    sum = 0
+    for x in range(n):
+        sum += pow(rate,x)        
+    return P0*sum
+
+def calculate_encounters(df, area):
+    base_encounters = (df["population_density_h"] * area * df["population_z"]).apply(round)
+    #decay_encounters = calculate_final_encounter(df["population_z"], df["escape_chance_z"])
+    decay_encounters = df.apply(lambda x: calculate_decay_encounter(x["population_z"], x["escape_chance_z"]), axis=1)
+    return np.minimum(base_encounters, decay_encounters)
     
 def calculate_derived_values(src_df:pd.DataFrame, settings:Settings) -> pd.DataFrame:    
     ret_df = src_df.copy()
@@ -104,7 +121,6 @@ def calculate_derived_values(src_df:pd.DataFrame, settings:Settings) -> pd.DataF
     ret_df["population_density_z"] = ret_df["population_z"] / ret_df["area"]
     speed_z = settings.zed_speed * 1.609 * 24 #Convert from mph to km/day
     area_z = speed_z * 1 * settings.encounter_distance * 3.048e-4 #km^2
-    ret_df["encounters"] = ret_df["population_density_h"] * area_z * ret_df["population_z"]
     ret_df["escape_chance_h"] = ret_df["cumulative_encounters_h"].apply(
         calculate_escape_chance, args=(
             settings.initial_escape_chance_h,
@@ -120,11 +136,14 @@ def calculate_derived_values(src_df:pd.DataFrame, settings:Settings) -> pd.DataF
             settings.combat_learning_rate_h,
             settings.combat_learning_threshold_h
         )
-    )
+    )    
+    ret_df["encounters"] = calculate_encounters(ret_df, area_z) 
     ret_df["bit_h"] = (ret_df["encounters"] * (1 - ret_df["escape_chance_h"])).apply(np.round)   
-    ret_df["bit_h"] = ret_df["bit_h"].clip(lower=0, upper=ret_df["population_h"])
-    ret_df["killed_z"] = (ret_df["encounters"] * (1 - ret_df["escape_chance_z"])).apply(np.round)
-    ret_df["killed_z"] = ret_df["killed_z"].clip(lower=0, upper=ret_df["population_z"])
+    ret_df["bit_h"] = ret_df["bit_h"].clip(lower=0, upper=ret_df["population_h"])    
+    # ret_df["killed_z"] = (ret_df["encounters"] * (1 - ret_df["escape_chance_z"])).apply(np.round)
+    # ret_df["killed_z"] = ret_df["killed_z"].clip(lower=0, upper=ret_df["population_z"])
+    ret_df["killed_z"] = ret_df["population_z"] * (1 - ret_df.apply(lambda x: pow(x["escape_chance_z"], x["encounters"]), axis=1))
+    ret_df["killed_z"] = ret_df["killed_z"].apply(np.round).clip(lower=0, upper=ret_df["population_z"])
     ret_df["migration_z"] = calculate_migration(ret_df).apply(np.round)    
     return ret_df
 
@@ -187,6 +206,7 @@ if __name__ == "__main__":
     from config import Filepaths
     my_settings = Settings()
     my_filepaths = Filepaths()
+    my_settings.outbreak_region = ["42"]
     shape_gdf, nieghbors_df, population_df = setup.main(my_settings, my_filepaths)
     initial_df = initialize(shape_gdf, nieghbors_df, population_df, my_settings)
-    print(initial_df.loc[initial_df.index[0]])
+    print(initial_df.loc["42"])

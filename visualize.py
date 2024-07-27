@@ -30,11 +30,13 @@ def generate_custom_colormap(basemap, color_slices = 5, alpha_slices = 4):
 
 def generate_geo_plot_data(src_data_list:list[DataFrame], gdf:GeoDataFrame, settings:Settings) -> GeoDataFrame:
     data = []
+    population_top_percentile = src_data_list[0]["population_h"].quantile(0.99)
+    pop_scaling = utils.safe_log10(population_top_percentile)
     for step in range(len(src_data_list)):
         pop_h = src_data_list[step]["population_h"]
         pop_z = src_data_list[step]["population_z"]
         value = pop_h.apply(utils.safe_log10) / (pop_h + pop_z + 2).apply(utils.safe_log10) #Should be between [0, 1)
-        level = 1 - ((pop_h + pop_z + 2).apply(utils.safe_log10) / 7).apply(min, args=(1,)) #Should be between [0, 1)
+        level = 1 - ((pop_h + pop_z + 2).apply(utils.safe_log10) / pop_scaling).apply(min, args=(1,)) #Should be between [0, 1)
         datum = settings.color_slices*(settings.alpha_slices * level).apply(math.floor) + (settings.color_slices * value).apply(math.floor)
         datum.name = step
         data.append(datum)
@@ -58,7 +60,7 @@ def get_data_limits(data:DataFrame, feature:str) -> tuple[tuple[float], tuple[fl
 
 def setup_plots_and_limits(plot_types, geo_data, pop_data, settings):
     no_of_plots = len(plot_types)
-    fig, axs = plt.subplots(1, no_of_plots, figsize=(no_of_plots * 4 + 4, 6),
+    fig, axs = plt.subplots(1, no_of_plots, figsize=(no_of_plots * 4 + 2, 6),
                             layout='constrained', squeeze=False)
     _ = fig.suptitle(settings.plot_title, fontdict={'fontsize': '20', 'fontweight' : '2'})
     
@@ -100,14 +102,18 @@ def generate_bar_frame(
     ax.clear()
     ax.set_ylim(limits[1])  
     ax.yaxis.tick_right()
+    ax.set_ylabel("Log10 Population")    
+    ax.yaxis.set_label_position("right")
     ax.spines['top'].set_visible(False)
-    ax.spines['left'].set_visible(False)
+    ax.spines['left'].set_visible(False)    
 
     #Plot population
     columns = pop_data.columns.to_list()
-    values = pop_data.loc[pop_data.index[frame]].apply(utils.safe_log10).to_list()
+    values = pop_data.loc[pop_data.index[frame]].to_list()
+    #Set up x-label
+    x_label = [ f"Human population\n{int(pow(10, values[0])):,}", f"Zed population\n{int(pow(10, values[1])):,}"]    
     colors = ["green", "red"]
-    ax.bar(columns, values, width=0.4, color=colors)
+    ax.bar(columns, values, width=0.4, tick_label = x_label, color=colors)
 
 def generate_geo_frame(
         frame:int, 
@@ -150,9 +156,11 @@ def generate_line_frame(
     ) -> None:
     #Clear and redraw line plot axes
     ax.clear()
-    ax.set_xlim(limits[0])
+    ax.set_xlim((0,frame+1))
     ax.set_ylim(limits[1])  
     ax.yaxis.tick_right()
+    ax.set_ylabel("Log10 Population")
+    ax.yaxis.set_label_position("right")
     ax.spines['top'].set_visible(False)
     ax.spines['left'].set_visible(False)
 
