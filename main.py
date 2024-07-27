@@ -22,7 +22,9 @@ def print_report(data, totals) -> None:
     print(f"Final population: {round(pow(10,totals.at[my_settings.simulation_length,'population_h_log10'])):,d}")
     print(f"Maximum zed population: {round(max([sum(df['population_z']) for df in data])):,d}")
 
-if __name__ == "__main__":    
+
+
+if __name__ == "__main__":
     my_settings = Settings()
     my_filepaths = Filepaths()
     print(f"Starting {my_settings.plot_title}")
