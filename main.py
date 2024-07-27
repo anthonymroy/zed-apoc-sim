@@ -17,6 +17,11 @@ def parse_arguments() -> argparse.Namespace:
                            help="Flag to visualize the last simulation without rerunning it")
     return parser.parse_args()    
 
+def print_report(data, totals) -> None:
+    print(f"Initial population: {round(pow(10,totals.at[0,'population_h_log10'])):,d}")
+    print(f"Final population: {round(pow(10,totals.at[my_settings.simulation_length,'population_h_log10'])):,d}")
+    print(f"Maximum zed population: {round(max([sum(df['population_z']) for df in data])):,d}")
+
 if __name__ == "__main__":    
     my_settings = Settings()
     my_filepaths = Filepaths()
@@ -28,7 +33,7 @@ if __name__ == "__main__":
             my_settings.simulation_resolution = resolution
         case _:
             error_msg = f"Resolution value of {resolution} is not understood. "
-            error_msg += "The value must be 'state' or ''county'"
+            error_msg += "The value must be ['state'] or 'county'"
             raise ValueError(error_msg)
     shape_gdf, border_df, population_df = setup.main(my_settings, my_filepaths)
     
@@ -45,9 +50,7 @@ if __name__ == "__main__":
 
     time_totals = simulate.summarize(time_data)
     print("Zombie Apocalypse Simulation complete:")
-    print(f"Initial population: {round(pow(10,time_totals.at[0,'population_h_log10'])):,d}")
-    print(f"Final population: {round(pow(10,time_totals.at[my_settings.simulation_length,'population_h_log10'])):,d}")
-    print(f"Maximum zed population: {round(max([sum(df['population_z']) for df in time_data])):,d}")
+    print_report(time_data, time_totals)
 
     if not my_args.sim_only:     
         plot_data = viz.generate_geo_plot_data(time_data, shape_gdf, my_settings)
@@ -57,6 +60,6 @@ if __name__ == "__main__":
         if my_settings.make_animation:
             mov = viz.make_animation(plot_data, state_borders, time_totals, my_settings)
             viz.save_animation(mov, my_settings)        
-    
+    print_report(time_data, time_totals)
 
     
