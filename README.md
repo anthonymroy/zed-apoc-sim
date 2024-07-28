@@ -14,15 +14,16 @@ Hobby project of simulating a zombie apocalypse in the United States
 
 ### Runtime instructions
 <pre>
-usage: main.py [-h] [--sim] [--viz] region
+usage: Zombie Apocalypse Simulato [-help] [-load] [-run] [-setup] [-sim] [-viz] [-quit]
 
-Simulate a zombie outbreak
-
-positional arguments:
-  region      The two-letter region to simulate. 'US' is the default value
+Commands
 
 options:
-  -h, --help  show this help message and exit
-  --sim       Flag to run only the simulation without visualization
-  --viz       Flag to visualize the last simulation without rerunning it
+  -help, --help    Show this help message
+  -load, --load    Load the last simulation run
+  -run, --run      Run the entire simulation pipeline
+  -setup, --setup  Setup the simulation by downloading necessary files
+  -sim, --sim      Simulation the zombie apocalypse
+  -viz, --viz      Visualize the results of the simulation
+  -quit, --quit    Quit the program
   </pre>

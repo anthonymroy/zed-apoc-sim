@@ -15,7 +15,7 @@ class Settings:
         self.combat_learning_threshold_h = 10
         self.zed_speed = 1 #mph
         self.encounter_distance = 30 #ft
-        self.simulation_length = 500     
+        self.simulation_length = 50     
         self.video_filename = "Zombie Apocalypse Simulation.gif"
         self.plot_title = "Zombie Apocalypse Simulator"
         self.visuzalize_geo_data = True
@@ -24,7 +24,7 @@ class Settings:
         self.show_image = False
         self.image_frame = 10
         self.make_animation = True
-        self.fps = 10 
+        self.fps = 2
         self.animation_duration = 15 #seconds
         self.time_progression = "lin" #Must be "lin" or "log"
         self.base_colormap = [[1.0, 0.0, 0.1, 1.0],
