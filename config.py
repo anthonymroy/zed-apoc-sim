@@ -42,6 +42,13 @@ class Settings:
         if self.visuzalize_line_data:
             plot_types.append("line")
         return plot_types
+    
+    def echo(self):
+        print(f"self.simulation_resolution = {self.simulation_resolution}")
+        print(f"self.outbreak_region = {self.outbreak_region}")
+        print(f"self.simulation_length = {self.simulation_length}")
+        print(f"self.fps = {self.fps}")
+        print(f"self.animation_duration = {self.animation_duration}")
 
 class Filepaths:
     def __init__(self):
