@@ -19,7 +19,7 @@ class Settings:
         self.video_filename = "Zombie Apocalypse Simulation.gif"
         self.plot_title = "Zombie Apocalypse Simulator"
         self.visuzalize_geo_data = True
-        self.visuzalize_bar_data = True
+        self.visuzalize_bar_data = False
         self.visuzalize_line_data = True
         self.show_image = False
         self.image_frame = 10
