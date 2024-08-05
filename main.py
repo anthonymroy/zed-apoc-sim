@@ -99,9 +99,15 @@ class SimCLI:
         self._parser.add_argument("-echo", dest="echo", action="store_true", help="Echo settings to screen")
         self._parser.add_argument("-help", action='help', default=SUPPRESS, help= "Show this help message")
         self._parser.add_argument("-load", dest="load", action="store_true", help="Load the last simulation run")
+        self._parser.add_argument("-days", dest="days", action="store", nargs='?', type=int ,
+                                  help="Number of days to simulate", default=None)
+        self._parser.add_argument("-region", dest="region", action="store", nargs='+', 
+                                  help="Region(s) where outbreak starts", default=None)
         self._parser.add_argument("-resolution", dest="resolution", action="store", help="Resolution of 'state'(default) or 'county'",
                             default=None, choices={"county", "state"})
         self._parser.add_argument("-run", dest="run", action="store_true", help="Run the simulation without visualization")
+        self._parser.add_argument("-size", dest="size", action="store", default=None, type = float,
+                                  help="Number of zeds to start with. Enter a number bewteen 0-1 to make the start a fraction of the existing population")
         self._parser.add_argument("-back", dest="back", action="store_true", help="Go back to main menu")
 
     def run(self):
@@ -113,10 +119,12 @@ class SimCLI:
             if text[0] != "-":
                 text = "-"+text
             try:
-                args = self._parser.parse_args(text.lower().split())
+                args = self._parser.parse_args(text.split())
                 if args.back:
                     print("Back to main menu...")
                     break
+                if args.days:
+                    self._settings.simulation_length = args.days
                 if args.echo:
                     self._settings.echo()
                 if args.load:
@@ -131,8 +139,12 @@ class SimCLI:
                 if args.run:
                     print("Run simulation only")
                     self._shape_gdf, self._simulation_data, self._simulation_summary = run_simulation(self._settings, self._filepaths)
+                if args.region:
+                    self._settings.outbreak_region = args.region
                 if args.resolution:
                     self._settings.simulation_resolution = args.resolution
+                if args.size:
+                    self._settings.outbreak_size = args.size
             except SystemExit:
                 #Don't exit the program on an error
                 pass
@@ -149,7 +161,13 @@ class VizCLI:
         self._parser.add_argument("-help", action='help', default=SUPPRESS, help= "Show this help message")
         self._parser.add_argument("-duration", dest="duration", action="store", help="Duration of the video",
                             default=None, type=float)
+        self._parser.add_argument("-frame", dest="frame", action="store", help="Frames to show",
+                            default=None, type=int)
+        self._parser.add_argument("-fps", dest="fps", action="store", help="Frames per second",
+                            default=None, type=float)
+        self._parser.add_argument("-image", dest="image", action="store_true", help="Make and show image")
         self._parser.add_argument("-run", dest="run", action="store_true", help="Run the visualization without rerunning the simulation")
+        self._parser.add_argument("-video", dest="video", action="store_true", help="Make and save video")
         self._parser.add_argument("-back", dest="back", action="store_true", help="Go back to main menu")
 
     def run(self):
@@ -165,8 +183,22 @@ class VizCLI:
                 if args.back:
                     print("Back to main menu...")
                     break
+                if args.duration:
+                    self._settings.animation_duration = args.duration
+                if args.frame:
+                    self._settings.image_frame = args.frame
+                if args.fps:
+                    self._settings.fps = args.fps
                 if args.echo:
                     self._settings.echo()
+                if args.image:
+                    plot_data = viz.generate_geo_plot_data(
+                        self._simulation_data, 
+                        self._shape_gdf, 
+                        self._settings
+                    )
+                    state_borders = setup.get_states_shapefile(self._filepaths)   
+                    viz.show_frame(plot_data, state_borders, self._simulation_summary, self._settings)
                 if args.run:
                     print("Run vizualization")
                     run_visualization(
@@ -177,8 +209,19 @@ class VizCLI:
                         self._simulation_summary
                     )
                     print_report(self._settings, self._simulation_data, self._simulation_summary)
-                if args.duration:
-                    self._settings.animation_duration = args.duration
+                if args.video:
+                    plot_data = viz.generate_geo_plot_data(
+                        self._simulation_data, 
+                        self._shape_gdf, 
+                        self._settings
+                    )
+                    state_borders = setup.get_states_shapefile(self._filepaths)   
+                    mov = viz.make_animation(
+                        plot_data, 
+                        state_borders, 
+                        self._simulation_summary, 
+                        self._settings)
+                    viz.save_animation(mov, self._settings)
             except SystemExit:
                 #Don't exit the program on an error
                 pass

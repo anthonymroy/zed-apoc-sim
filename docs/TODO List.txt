@@ -20,6 +20,7 @@
 - Add unit tests
 - Make scenerios from movies
 - Make reported data configurable (after adding UI)
+- Add decorators to UI
 - Consider making a stacked bargraph that shows the human, zed, and dead populations of each state
 - Revisit learning model and make sure initial and final rates are accurate
 - Fix warnings

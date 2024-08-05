@@ -46,8 +46,10 @@ class Settings:
     def echo(self):
         print(f"self.simulation_resolution = {self.simulation_resolution}")
         print(f"self.outbreak_region = {self.outbreak_region}")
+        print(f"self.outbreak_size = {self.outbreak_size}")
         print(f"self.simulation_length = {self.simulation_length}")
         print(f"self.fps = {self.fps}")
+        print(f"self.frame = {self.image_frame}")
         print(f"self.animation_duration = {self.animation_duration}")
 
 class Filepaths:
