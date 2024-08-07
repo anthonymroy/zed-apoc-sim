@@ -3,16 +3,16 @@ import os
 class Settings:
     def __init__(self):
         self.simulation_resolution = "state"
-        self.outbreak_region = ["42007", "42019", "42"]
+        self.outbreak_region = ["42"]
         self.outbreak_size = 0.0001 #Number of zeds to start with. Enter a number bewteen 0-1 to make the start a fraction of the existing population
-        self.initial_escape_chance_h = 0.25
+        self.initial_escape_chance_h = 0.35
         self.final_escape_chance_h = 0.95
         self.initial_escape_chance_z = 0.95
         self.final_escape_chance_z = 0.1
         self.escape_learning_rate_h = 1
-        self.escape_learning_threshold_h = 1
-        self.combat_learning_rate_h = 0.5
-        self.combat_learning_threshold_h = 10
+        self.escape_learning_threshold_h = 4
+        self.combat_learning_rate_h = .5
+        self.combat_learning_threshold_h = 20
         self.zed_speed = 1 #mph
         self.encounter_distance = 30 #ft
         self.simulation_length = 50     
@@ -24,7 +24,7 @@ class Settings:
         self.show_image = False
         self.image_frame = 10
         self.make_animation = True
-        self.fps = 2
+        self.fps = 5
         self.animation_duration = 15 #seconds
         self.time_progression = "lin" #Must be "lin" or "log"
         self.base_colormap = [[1.0, 0.0, 0.1, 1.0],
@@ -44,13 +44,15 @@ class Settings:
         return plot_types
     
     def echo(self):
-        print(f"self.simulation_resolution = {self.simulation_resolution}")
-        print(f"self.outbreak_region = {self.outbreak_region}")
-        print(f"self.outbreak_size = {self.outbreak_size}")
-        print(f"self.simulation_length = {self.simulation_length}")
-        print(f"self.fps = {self.fps}")
-        print(f"self.frame = {self.image_frame}")
-        print(f"self.animation_duration = {self.animation_duration}")
+        print(f"days = {self.simulation_length}")
+        print(f"duration = {self.animation_duration}")
+        print(f"frame = {self.image_frame}")
+        print(f"fps = {self.fps}")        
+        print(f"image = {self.show_image}")
+        print(f"video = {self.make_animation}")
+        print(f"region = {self.outbreak_region}")
+        print(f"resolution = {self.simulation_resolution}")
+        print(f"size = {self.outbreak_size}")
 
 class Filepaths:
     def __init__(self):

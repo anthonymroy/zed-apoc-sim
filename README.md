@@ -14,16 +14,28 @@ Hobby project of simulating a zombie apocalypse in the United States
 
 ### Runtime instructions
 <pre>
-usage: Zombie Apocalypse Simulato [-help] [-load] [-run] [-setup] [-sim] [-viz] [-quit]
+usage: Simulator Settings [-days [DAYS]] [-duration DURATION] [-echo] [-frame FRAME] [-fps FPS] [-help] [-image] [-load]
+                          [-region REGION [REGION ...]] [-resolution {county,state}] [-run] [-size SIZE] [-video] [-viz]
+                          [-quit]
 
 Commands
 
 options:
-  -help, --help    Show this help message
-  -load, --load    Load the last simulation run
-  -run, --run      Run the entire simulation pipeline
-  -setup, --setup  Setup the simulation by downloading necessary files
-  -sim, --sim      Simulation the zombie apocalypse
-  -viz, --viz      Visualize the results of the simulation
-  -quit, --quit    Quit the program
+  -days [DAYS]          Number of days to simulate
+  -duration DURATION    Duration of the video
+  -echo                 Echo settings to screen
+  -frame FRAME          Frames to show
+  -fps FPS              Frames per second
+  -help                 Show this help message
+  -image                Make and show image
+  -load                 Load the last simulation run
+  -region REGION [REGION ...]
+                        Region(s) where outbreak starts
+  -resolution {county,state}
+                        Resolution of 'state'(default) or 'county'
+  -run                  Run simulation and visualization
+  -size SIZE            Number of zeds to start with. Enter a number bewteen 0-1 to make the start a fraction of the existing population
+  -video                Make and save video
+  -viz                  Run visualization using previous simulation
+  -quit                 Quit the program
   </pre>
