@@ -119,9 +119,23 @@ def get_states_shapefile(filepaths:Filepaths) -> gpd.GeoDataFrame:
     state_shape_gdf = filter_for_contiguous(state_shape_gdf)
     return state_shape_gdf
 
+def get_county_shapefile(filepaths:Filepaths) -> gpd.GeoDataFrame:
+    counties_shape_filepath = os.path.join(filepaths.shape_directory,filepaths.county_shapefile_filename)
+    if os.path.exists(counties_shape_filepath):
+            print(f"Downloading {counties_shape_filepath}")
+            counties_shape_gdf = gpd.read_file(counties_shape_filepath)
+    else:
+        print(f"Can not find {counties_shape_filepath}. Generating now...")
+        counties_shape_gdf = download_counties_shapefile(counties_shape_filepath)  
+    counties_shape_gdf["STATEFP"] = counties_shape_gdf["STATEFP"].apply(add_leading_zeros, args=(2,))
+    counties_shape_gdf["id"] = counties_shape_gdf["STATEFP"] + counties_shape_gdf["COUNTYFP"]
+    counties_shape_gdf = sch.clean_df(counties_shape_gdf, sch.ShapeSchema)
+    counties_shape_gdf = filter_for_contiguous(counties_shape_gdf)    
+    return counties_shape_gdf
+
 def main(settings:Settings, filepaths:Filepaths) -> tuple[gpd.GeoDataFrame, pd.DataFrame, pd.DataFrame]:  
     state_neighbors_filepath = os.path.join(filepaths.neighbor_directory,filepaths.state_neighbors_filename)
-    counties_shape_filepath = os.path.join(filepaths.shape_directory,filepaths.county_shapefile_filename)
+    
     county_neighbors_filepath = os.path.join(filepaths.neighbor_directory,filepaths.county_neighbors_filename)
     population_filepath = filepaths.county_populations_filename
     
@@ -136,17 +150,8 @@ def main(settings:Settings, filepaths:Filepaths) -> tuple[gpd.GeoDataFrame, pd.D
         state_neighbors_df = pd.DataFrame.from_records(state_neighbors_data)
     state_neighbors_df = sch.clean_df(state_neighbors_df, sch.GraphSchema)    
 
-    if settings.simulation_resolution.lower() == "county":
-        if os.path.exists(counties_shape_filepath):
-            print(f"Downloading {counties_shape_filepath}")
-            counties_shape_gdf = gpd.read_file(counties_shape_filepath)
-        else:
-            print(f"Can not find {counties_shape_filepath}. Generating now...")
-            counties_shape_gdf = download_counties_shapefile(counties_shape_filepath)  
-        counties_shape_gdf["STATEFP"] = counties_shape_gdf["STATEFP"].apply(add_leading_zeros, args=(2,))
-        counties_shape_gdf["id"] = counties_shape_gdf["STATEFP"] + counties_shape_gdf["COUNTYFP"]
-        counties_shape_gdf = sch.clean_df(counties_shape_gdf, sch.ShapeSchema)
-        counties_shape_gdf = filter_for_contiguous(counties_shape_gdf)    
+    if settings.simulation_resolution.lower() == "county":        
+        counties_shape_gdf = get_county_shapefile(filepaths)    
 
         if os.path.exists(county_neighbors_filepath):
             print(f"Downloading {county_neighbors_filepath}")  

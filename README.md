@@ -14,15 +14,28 @@ Hobby project of simulating a zombie apocalypse in the United States
 
 ### Runtime instructions
 <pre>
-usage: main.py [-h] [--sim] [--viz] region
+usage: Simulator Settings [-days [DAYS]] [-duration DURATION] [-echo] [-frame FRAME] [-fps FPS] [-help] [-image] [-load]
+                          [-region REGION [REGION ...]] [-resolution {county,state}] [-run] [-size SIZE] [-video] [-viz]
+                          [-quit]
 
-Simulate a zombie outbreak
-
-positional arguments:
-  region      The two-letter region to simulate. 'US' is the default value
+Commands
 
 options:
-  -h, --help  show this help message and exit
-  --sim       Flag to run only the simulation without visualization
-  --viz       Flag to visualize the last simulation without rerunning it
+  -days [DAYS]          Number of days to simulate
+  -duration DURATION    Duration of the video
+  -echo                 Echo settings to screen
+  -frame FRAME          Frames to show
+  -fps FPS              Frames per second
+  -help                 Show this help message
+  -image                Make and show image
+  -load                 Load the last simulation run
+  -region REGION [REGION ...]
+                        Region(s) where outbreak starts
+  -resolution {county,state}
+                        Resolution of 'state'(default) or 'county'
+  -run                  Run simulation and visualization
+  -size SIZE            Number of zeds to start with. Enter a number bewteen 0-1 to make the start a fraction of the existing population
+  -video                Make and save video
+  -viz                  Run visualization using previous simulation
+  -quit                 Quit the program
   </pre>

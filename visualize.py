@@ -179,7 +179,7 @@ def show_frame(geo_data:GeoDataFrame, plot_borders:GeoDataFrame, pop_data:DataFr
 def make_animation(geo_data:GeoDataFrame, plot_borders:GeoDataFrame, pop_data:DataFrame, settings:Settings) -> animation.FuncAnimation:
     plot_types = settings.get_plot_types()
     (fig, axs, limits, colormap) = setup_plots_and_limits(plot_types, geo_data, pop_data, settings) 
-    total_frames = settings.fps * settings.animation_duration + 1
+    total_frames = round(settings.fps * settings.animation_duration + 1)
     match settings.time_progression:
         case "lin":
             key_frames = utils.calculate_key_frames_linear(len(geo_data.keys())-1, total_frames)
