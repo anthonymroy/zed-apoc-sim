@@ -12,6 +12,7 @@ Hobby project of simulating a zombie apocalypse in the United States
 
 `python .\main.py`
 
+`>>run`
 ### Runtime instructions
 <pre>
 usage: Simulator Settings [-days [DAYS]] [-duration DURATION] [-echo] [-frame FRAME] [-fps FPS] [-help] [-image] [-load]

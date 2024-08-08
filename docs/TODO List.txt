@@ -1,5 +1,5 @@
-- More info in text report, feedback overall [ON DECK]
-- Add UI and saved values [ON DECK]
+- More info in text report, feedback overall [IN PROGRESS]
+- Revamp neighbor algorithm with self join [IN PROGRESS]
 
 - Add zombie decay
 - Add migration options
@@ -51,6 +51,7 @@
 - Scale population alpha leveling with resolution [DONE]
 - Fix Bar graph scale [DONE]
 - Make states vs counties configurable [DONE]
+- Add UI and saved values [DONE]
 
-- Enable cloud runs [CANCELLED]
-- Enable parallel FEM [CANCELLED]
+- Enable cloud runs [STRETCH]
+- Enable parallel FEM [STRECH]

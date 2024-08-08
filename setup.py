@@ -34,6 +34,49 @@ def generate_county_neighborfile(gdf:gpd.GeoDataFrame, neighbor_states_df:pd.Dat
                 data.append(new_datum)
     return data
 
+def generate_county_neighborfile2(gdf_src:gpd.GeoDataFrame) -> pd.DataFrame:
+    gdf = gdf_src.copy()
+    gdf.set_index("id", inplace=True)
+    gdf['geometry'] = gdf.buffer(0.01) #1 km because polygons are 1:100 km
+
+    # Self join based on intersection
+    joined_gdf = gdf.sjoin(gdf, how='inner', op='intersects')
+
+    # Filter out self-adjacencies
+    neighbor_gdf = joined_gdf[joined_gdf.index != joined_gdf["index_right"]]
+
+    data = []
+    region_ids = neighbor_gdf.index.unique()
+    for id1 in region_ids:
+        neighbors = []
+        my_dict = {
+            "id":id1, 
+            "state_fp":gdf.at[id1, "STATEFP"],
+            "name":gdf.at[id1, "NAME"],
+        }
+        if "COUNTYFP" in gdf.columns:
+            my_dict["county_fp"] = gdf.at[id1, "COUNTYFP"]
+        # Shapefile polygons are 1:100 km
+        my_border_length = 100 * utils.get_border_length(gdf.geometry[id1])
+        my_dict["border_length"] = my_border_length
+        neighbor_ids = neighbor_gdf[neighbor_gdf.index==id1]["index_right"]
+        for id2 in neighbor_ids:
+            # Shapefile polygons are 1:100 km
+            shared_border_length = 100 * utils.get_shared_border_length(gdf.geometry[id2], gdf.geometry[id2])
+            if shared_border_length > 0:
+                neighbor_dict = {
+                    "neighbor_id":id2, 
+                    "neighbor_state_fp":gdf.at[id2, "STATEFP"],
+                    "neighbor_name":gdf.at[id2, "NAME"],
+                    "shared_border_length":shared_border_length,
+                }
+                if "COUNTYFP" in gdf.columns:
+                    neighbor_dict["county_fp"] = gdf.at[id2, "COUNTYFP"]
+                neighbors.append(neighbor_dict)
+        my_dict["neighbors"] = neighbors
+        data.append(my_dict) 
+    return data
+
 def generate_neighborfile(gdf:gpd.GeoDataFrame) -> list[dict]:
     data = []
     for idx1 in gdf.index:
@@ -193,6 +236,22 @@ def main(settings:Settings, filepaths:Filepaths) -> tuple[gpd.GeoDataFrame, pd.D
     return (simulation_gdf, neighbor_df, population_df)
         
 if __name__ == "__main__":
+    import time
     my_filepaths = Filepaths()
     my_settings = Settings()
-    main(my_settings, my_filepaths)
+    #main(my_settings, my_filepaths)    
+    my_counties = get_county_shapefile(my_filepaths)
+    my_state_neighbors_file = os.path.join(my_filepaths.neighbor_directory,my_filepaths.state_neighbors_filename)
+    my_state_neighbors_df = utils.df_from_json(my_state_neighbors_file)
+
+    print("----- generate_county_neighborfile -----")
+    start = time.time()
+    generate_county_neighborfile(my_counties, my_state_neighbors_df)
+    end = time.time()
+    print(f"{end - start} elapsed")
+
+    print("----- generate_county_neighborfile2 -----")
+    start = time.time()
+    generate_county_neighborfile2(my_counties)
+    end = time.time()
+    print(f"{end - start} elapsed")
