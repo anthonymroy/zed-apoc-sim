@@ -19,53 +19,48 @@ def download_counties_shapefile(filename:str) -> gpd.GeoDataFrame:
     gdf.to_file(filename, driver='ESRI Shapefile')
     return gdf
 
-def generate_county_neighborfile(gdf:gpd.GeoDataFrame, neighbor_states_df:pd.DataFrame) -> pd.DataFrame:
-    data = []
-    for index in neighbor_states_df.index:
-        print(f"Constructing county neighborhoods for {neighbor_states_df.at[index,'name']}") 
-        my_state_fps = neighbor_states_df.at[index,"state_fp"]
-        state_fps_to_keep = [my_state_fps]
-        for neighbor in neighbor_states_df.at[index,"neighbors"]:
-            state_fps_to_keep.append(neighbor["neighbor_state_fp"])
-        filtered_gdf = gdf[gdf["STATEFP"].isin(state_fps_to_keep)]
-        new_data = generate_neighborfile(filtered_gdf)
-        for new_datum in new_data:
-            if new_datum['state_fp'] == my_state_fps:
-                data.append(new_datum)
-    return data
+def generate_neighborfile(gdf_src:gpd.GeoDataFrame) -> list[dict]:
+    gdf = gdf_src.copy()
+    gdf.set_index("id", inplace=True)
+    buffer_gdf = gdf.copy()
+    buffer_gdf['geometry'] = buffer_gdf.buffer(0.01) #1 km because polygons are 1:100 km
 
-def generate_neighborfile(gdf:gpd.GeoDataFrame) -> list[dict]:
+    # Self join based on intersection
+    joined_gdf = buffer_gdf.sjoin(buffer_gdf, how='inner', op='intersects')
+
+    # Filter out self-adjacencies
+    neighbor_gdf = joined_gdf[joined_gdf.index != joined_gdf["index_right"]]
+
     data = []
-    for idx1 in gdf.index:
-        neighbors = []        
+    region_ids = neighbor_gdf.index.unique()
+    for id1 in region_ids:
+        neighbors = []
         my_dict = {
-            "id":gdf.at[idx1, "id"], 
-            "state_fp":gdf.at[idx1, "STATEFP"],
-            "name":gdf.at[idx1, "NAME"],
+            "id":id1, 
+            "state_fp":gdf.at[id1, "STATEFP"],
+            "name":gdf.at[id1, "NAME"],
         }
         if "COUNTYFP" in gdf.columns:
-            my_dict["county_fp"] = gdf.at[idx1, "COUNTYFP"]
+            my_dict["county_fp"] = gdf.at[id1, "COUNTYFP"]
         # Shapefile polygons are 1:100 km
-        my_border_length = 100 * utils.get_border_length(gdf.geometry[idx1])
+        my_border_length = 100 * utils.get_border_length(gdf.geometry[id1])
         my_dict["border_length"] = my_border_length
-        for idx2 in gdf.index:
-            if idx1 == idx2:
-                continue
+        neighbor_ids = neighbor_gdf[neighbor_gdf.index==id1]["index_right"]
+        for id2 in neighbor_ids:
             # Shapefile polygons are 1:100 km
-            shared_border_length = 100 * utils.get_shared_border_length(gdf.geometry[idx1],
-                                                                         gdf.geometry[idx2])
+            shared_border_length = 100 * utils.get_shared_border_length(gdf.geometry[id1], gdf.geometry[id2])
             if shared_border_length > 0:
                 neighbor_dict = {
-                    "neighbor_id":gdf.at[idx2, "id"], 
-                    "neighbor_state_fp":gdf.at[idx2, "STATEFP"],
-                    "neighbor_name":gdf.at[idx2, "NAME"],
+                    "neighbor_id":id2, 
+                    "neighbor_state_fp":gdf.at[id2, "STATEFP"],
+                    "neighbor_name":gdf.at[id2, "NAME"],
                     "shared_border_length":shared_border_length,
                 }
                 if "COUNTYFP" in gdf.columns:
-                    neighbor_dict["county_fp"] = gdf.at[idx2, "COUNTYFP"]
+                    neighbor_dict["neighbor_county_fp"] = gdf.at[id2, "COUNTYFP"]
                 neighbors.append(neighbor_dict)
         my_dict["neighbors"] = neighbors
-        data.append(my_dict)    
+        data.append(my_dict) 
     return data
 
 def add_leading_zeros(value:any, desired_length=3) -> str:
@@ -139,26 +134,26 @@ def main(settings:Settings, filepaths:Filepaths) -> tuple[gpd.GeoDataFrame, pd.D
     county_neighbors_filepath = os.path.join(filepaths.neighbor_directory,filepaths.county_neighbors_filename)
     population_filepath = filepaths.county_populations_filename
     
-    state_shape_gdf = get_states_shapefile(filepaths)
-    if os.path.exists(state_neighbors_filepath):  
-        print(f"Downloading {state_neighbors_filepath}")      
-        state_neighbors_df = utils.df_from_json(state_neighbors_filepath)
-    else:
-        print(f"Can not find {state_neighbors_filepath}. Generating now...")
-        state_neighbors_data = generate_neighborfile(state_shape_gdf)
-        utils.write_json_file(state_neighbors_data, state_neighbors_filepath)  
-        state_neighbors_df = pd.DataFrame.from_records(state_neighbors_data)
-    state_neighbors_df = sch.clean_df(state_neighbors_df, sch.GraphSchema)    
+    if settings.simulation_resolution.lower() == "state": 
+        state_shape_gdf = get_states_shapefile(filepaths)
+        if os.path.exists(state_neighbors_filepath):  
+            print(f"Downloading {state_neighbors_filepath}")      
+            state_neighbors_df = utils.df_from_json(state_neighbors_filepath)
+        else:
+            print(f"Can not find {state_neighbors_filepath}. Generating now...")
+            state_neighbors_data = generate_neighborfile(state_shape_gdf)
+            utils.write_json_file(state_neighbors_data, state_neighbors_filepath)  
+            state_neighbors_df = pd.DataFrame.from_records(state_neighbors_data)
+        state_neighbors_df = sch.clean_df(state_neighbors_df, sch.GraphSchema)    
 
     if settings.simulation_resolution.lower() == "county":        
         counties_shape_gdf = get_county_shapefile(filepaths)    
-
         if os.path.exists(county_neighbors_filepath):
             print(f"Downloading {county_neighbors_filepath}")  
             county_neighbors_df = utils.df_from_json(county_neighbors_filepath)
         else:
             print(f"Can not find {county_neighbors_filepath}. Generating now...")
-            county_neighbors_data = generate_county_neighborfile(counties_shape_gdf, state_neighbors_df) 
+            county_neighbors_data = generate_neighborfile(counties_shape_gdf) 
             utils.write_json_file(county_neighbors_data, county_neighbors_filepath)
             county_neighbors_df = pd.DataFrame.from_records(county_neighbors_data)     
         county_neighbors_df = sch.clean_df(county_neighbors_df, sch.GraphSchema)
@@ -195,4 +190,5 @@ def main(settings:Settings, filepaths:Filepaths) -> tuple[gpd.GeoDataFrame, pd.D
 if __name__ == "__main__":
     my_filepaths = Filepaths()
     my_settings = Settings()
-    main(my_settings, my_filepaths)
+    my_settings.simulation_resolution = "county"
+    main(my_settings, my_filepaths)    

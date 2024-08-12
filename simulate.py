@@ -45,7 +45,8 @@ def calculate_static_values(
     ret_df["border_length"] = neigh_df["border_length"]
     ret_df["area"] = gdf["ALAND"] * 1e-6 #km^2
     ret_df["border_area_z"] = (ret_df["border_length"]*distance_z).clip(upper= ret_df["area"])
-    ret_df["neighbors"] = neigh_df["neighbors"] 
+    ret_df["neighbors"] = neigh_df["neighbors"]
+    ret_df.dropna(axis='index', subset="neighbors", inplace=True)
     return ret_df
 
 def fix_migration_roundoff(migrations:pd.Series, error:int) -> pd.Series:
@@ -67,6 +68,8 @@ def fix_migration_roundoff(migrations:pd.Series, error:int) -> pd.Series:
 def calculate_migration(src_df:pd.DataFrame) -> pd.Series:
     ret = pd.Series(index=src_df.index)
     for my_id in ret.index:
+        if my_id == "41033" or my_id == "41017":
+            junk = 1
         total = 0        
         my_conc = (src_df.at[my_id,"population_z"] - src_df.at[my_id,"killed_z"]) / src_df.at[my_id,"area"]        
         for neighbor in src_df.at[my_id,"neighbors"]:
@@ -179,7 +182,7 @@ def run(initial_df:pd.DataFrame, settings:Settings) -> list[pd.DataFrame]:
         df_1 = time_step(df_0, settings)
         total_population = sum(df_1["population_h"]) + sum(df_1["population_z"]) + sum(df_1["population_d"])
         if total_population != intial_population:
-            raise RuntimeError("Population has changed")
+            raise RuntimeError(f"Population has changed by {total_population - intial_population}")
         df_0 = df_1.copy()
         data.append(df_0)
     return data
@@ -201,7 +204,8 @@ if __name__ == "__main__":
     from config import Filepaths
     my_settings = Settings()
     my_filepaths = Filepaths()
-    my_settings.outbreak_region = ["42"]
+    my_settings.outbreak_region = ["53003"]
+    my_settings.simulation_resolution = "county"
     shape_gdf, nieghbors_df, population_df = setup.main(my_settings, my_filepaths)
     initial_df = initialize(shape_gdf, nieghbors_df, population_df, my_settings)
-    print(initial_df.loc["42"])
+    print(initial_df.loc["53003"])
