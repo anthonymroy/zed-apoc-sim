@@ -55,5 +55,6 @@ CONTIGUOUS_STATES = [
 #     {"name":"California","short_name": "CA", "state_fp": 6},
 #     {"name":"Arizona","short_name": "AZ", "state_fp": 4},    
 #     {"name":"Nevada","short_name": "NV", "state_fp": 32},
-#     {"name":"Oregon","short_name": "OR", "state_fp": 41}
+#     {"name":"Oregon","short_name": "OR", "state_fp": 41},
+#     {"name":"Washington","short_name": "WA", "state_fp": 53}
 # ]

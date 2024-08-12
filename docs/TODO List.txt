@@ -1,5 +1,5 @@
-- More info in text report, feedback overall [IN PROGRESS]
-- Revamp neighbor algorithm with self join [IN PROGRESS]
+ - Clean up runtime warnings [IN PROGRESS]
+- Revisit learning model and make sure initial and final rates are accurate [IN PROGRESS]
 
 - Add zombie decay
 - Add migration options
@@ -22,9 +22,8 @@
 - Make reported data configurable (after adding UI)
 - Add decorators to UI
 - Consider making a stacked bargraph that shows the human, zed, and dead populations of each state
-- Revisit learning model and make sure initial and final rates are accurate
-- Fix warnings
-- Figure out if any pop can go to 0 and make it so if possible
+- Add autosave of n and n+1 dataframes on simulation.run faliures
+- Save settings with runs
 
 - Add arguments [DONE]
 - Save simulations [DONE]
@@ -52,6 +51,8 @@
 - Fix Bar graph scale [DONE]
 - Make states vs counties configurable [DONE]
 - Add UI and saved values [DONE]
+- Revamp neighbor algorithm with self join [DONE]
+- Figure out if any pop can go to 0 and make it so if possible [DONE]
 
 - Enable cloud runs [STRETCH]
 - Enable parallel FEM [STRECH]
