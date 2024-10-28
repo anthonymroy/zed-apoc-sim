@@ -1,4 +1,6 @@
-- Make scenerios from movies [IN PROGRESS]
+- Make scenerios from movies [CLI REDUX]
+- Make scenerios from movies [ON DECK]
+
 
 - Add zombie decay
 - Add migration options
@@ -23,6 +25,8 @@
 - Add autosave of n and n+1 dataframes on simulation.run faliures
 - Save settings with runs
 - Clean up utils.sigmoid2, simulate.calculate_escape_chance, and the learning rates in config (after unit tests)
+- Add an auto stop
+
 
 - Add arguments [DONE]
 - Save simulations [DONE]
