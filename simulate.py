@@ -102,6 +102,14 @@ def calculate_escape_chance(cumulative_encounters, initial, final, m, b):
     ret = initial + scale*ret
     return ret
 
+def calculate_escape_chance2(x, initial, final, l, mu = 0.5):
+    a = 2*(final - initial)
+    c = final - a
+    k = a / (mu*(final - initial) + initial - c)    
+    m = math.log(k-1)/-l
+    sig = utils.sigmoid2(m*x)
+    return a*sig + c
+
 def calculate_decay_encounter(P0, rate):
     n = math.ceil(math.log(0.5/(P0 + 1), rate))
     sum = 0
@@ -121,19 +129,30 @@ def calculate_derived_values(src_df:pd.DataFrame, settings:Settings) -> pd.DataF
     ret_df["population_density_z"] = ret_df["population_z"] / ret_df["area"]
     speed_z = settings.zed_speed * 1.609 * 24 #Convert from mph to km/day
     area_z = speed_z * 1 * settings.encounter_distance * 3.048e-4 #km^2
+    # ret_df["escape_chance_h"] = ret_df["cumulative_encounters_h"].apply(
+    #     calculate_escape_chance, args=(
+    #         settings.initial_escape_chance_h,
+    #         settings.final_escape_chance_h,
+    #         settings.escape_learning_rate_h,
+    #         settings.escape_learning_threshold_h
+    #     )
     ret_df["escape_chance_h"] = ret_df["cumulative_encounters_h"].apply(
-        calculate_escape_chance, args=(
+        calculate_escape_chance2, args=(
             settings.initial_escape_chance_h,
             settings.final_escape_chance_h,
-            settings.escape_learning_rate_h,
             settings.escape_learning_threshold_h
         )
     )
     ret_df["escape_chance_z"] = ret_df["cumulative_encounters_h"].apply(
-        calculate_escape_chance, args=(
+        # calculate_escape_chance, args=(
+        #     settings.initial_escape_chance_z,
+        #     settings.final_escape_chance_z,
+        #     settings.combat_learning_rate_h,
+        #     settings.combat_learning_threshold_h
+        # )
+        calculate_escape_chance2, args=(
             settings.initial_escape_chance_z,
             settings.final_escape_chance_z,
-            settings.combat_learning_rate_h,
             settings.combat_learning_threshold_h
         )
     )    

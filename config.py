@@ -10,7 +10,7 @@ class Settings:
         self.initial_escape_chance_z = 0.95
         self.final_escape_chance_z = 0.1
         self.escape_learning_rate_h = 1
-        self.escape_learning_threshold_h = 4
+        self.escape_learning_threshold_h = 3
         self.combat_learning_rate_h = .5
         self.combat_learning_threshold_h = 20
         self.zed_speed = 1 #mph

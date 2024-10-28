@@ -28,6 +28,7 @@ venv.bak/
 
 # Personal scratch file
 scratch.txt
+scratch/
 
 # Simulation files
 *.sim

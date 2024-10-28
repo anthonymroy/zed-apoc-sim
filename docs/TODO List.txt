@@ -24,6 +24,7 @@
 - Consider making a stacked bargraph that shows the human, zed, and dead populations of each state
 - Add autosave of n and n+1 dataframes on simulation.run faliures
 - Save settings with runs
+- Clean up utils.sigmoid2, simulate.calculate_escape_chance, and the learning rates in config after a test is made
 
 - Add arguments [DONE]
 - Save simulations [DONE]

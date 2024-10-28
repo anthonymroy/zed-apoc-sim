@@ -22,11 +22,11 @@ def download_counties_shapefile(filename:str) -> gpd.GeoDataFrame:
 def generate_neighborfile(gdf_src:gpd.GeoDataFrame) -> list[dict]:
     gdf = gdf_src.copy()
     gdf.set_index("id", inplace=True)
-    buffer_gdf = gdf.copy()
+    buffer_gdf = gdf.to_crs(epsg=32618) #32618 is the UTM code for North America
     buffer_gdf['geometry'] = buffer_gdf.buffer(0.01) #1 km because polygons are 1:100 km
 
     # Self join based on intersection
-    joined_gdf = buffer_gdf.sjoin(buffer_gdf, how='inner', op='intersects')
+    joined_gdf = buffer_gdf.sjoin(buffer_gdf, how='inner', predicate='intersects')
 
     # Filter out self-adjacencies
     neighbor_gdf = joined_gdf[joined_gdf.index != joined_gdf["index_right"]]
@@ -190,5 +190,8 @@ def main(settings:Settings, filepaths:Filepaths) -> tuple[gpd.GeoDataFrame, pd.D
 if __name__ == "__main__":
     my_filepaths = Filepaths()
     my_settings = Settings()
-    my_settings.simulation_resolution = "county"
-    main(my_settings, my_filepaths)    
+    my_settings.simulation_resolution = "state"
+    df1, df2, df3, = main(my_settings, my_filepaths)   
+    print(f"df1.shape = {df1.shape}") 
+    print(f"df2.shape = {df2.shape}") 
+    print(f"df3.shape = {df3.shape}") 

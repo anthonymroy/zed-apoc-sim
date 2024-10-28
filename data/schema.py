@@ -91,13 +91,13 @@ def safe_literal_eval(text:str) -> any:
 def clean_df(df:pd.DataFrame, schema:DataFrameSchema) -> pd.DataFrame:
     #Remove empty colums and rows
     df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
-    df.dropna(axis="index", how="all", inplace=True)
+    df = df.dropna(axis="index", how="all")
     #Convert strings to the lists and/or boolean they are supposed to represent
     for key in schema.columns:
         if key not in df.columns:
             continue
         df[key] = df[key].apply(safe_literal_eval)
     #Wierd things happen when trying to set a type of an empty column, so we drop them
-    df.dropna(axis="columns", how="all", inplace=True)
+    df = df.dropna(axis="columns", how="all")
     df = schema(df, lazy=True)    
     return df

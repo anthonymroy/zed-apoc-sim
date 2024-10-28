@@ -30,6 +30,9 @@ def df_from_json(filename:str, index=None) -> DataFrame:
 def sigmoid(x:float, m:float=1, b:float=0) -> float:
     return 1 / (1 + math.exp(-m*(x-b/m)))
 
+def sigmoid2(x:float) -> float:
+    return 1 / (1 + math.exp(-x))
+
 def safe_log10(x:float) -> float:
     if x < 1 :
         return 0
