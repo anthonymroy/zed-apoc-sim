@@ -27,7 +27,8 @@
 - Clean up utils.sigmoid2, simulate.calculate_escape_chance, and the learning rates in config (after unit tests)
 - Add an auto stop
 - Make CLI interruptable
-- Enable setting initial outbreak populations by entire regions
+- Enable setting initial outbreak populations by entire states
+
 
 - Add arguments [DONE]
 - Save simulations [DONE]

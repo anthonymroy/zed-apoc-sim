@@ -11,7 +11,15 @@ def outbreak(src_df:pd.DataFrame, ground_zero_list:list[str], zero_patients:floa
     ret_df = src_df.copy()
     for ground_zero in ground_zero_list:
         if ground_zero not in list(ret_df.index):
-            ground_zero = random.choice(list(ret_df.index))
+            if ground_zero.lower() == 'us':
+                if zero_patients < 1:
+                    ret_df["population_z"] = zero_patients*ret_df["population_h"]
+                else:
+                    ret_df["population_z"] = zero_patients
+                continue
+            else:
+                raise Exception(f'{ground_zero} is not a recognized region.')
+        
         if zero_patients < 1:
             ret_df.at[ground_zero, "population_z"] = zero_patients*ret_df.at[ground_zero, "population_h"]
         else:
