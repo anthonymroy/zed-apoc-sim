@@ -6,11 +6,11 @@ Simulation of a large outbreak in California, simulated at state resolution.
 
 ## Scenario 1 - *Night of the Living Dead (1968)*
 
-Simulation of the original modern zombie movie, *Night of the Living Dead.* The outpbreak states with slow moving zeds in rural Pennsylvania / Ohio where 0.013% of the population, i.e. the recently deceased, are the original zeds.
+Simulation of the original modern zombie movie, *Night of the Living Dead.* The outbreak stasart in rural Pennsylvania / Ohio where 0.013% of the population, i.e. the recently deceased, are the original, slow-moving zeds.
 
 ## Scenario 2 - *Dawn of the Dead (2004)*
 
-Simulation of the modern, modern zombie movie, the *Dawn of the Dead* remake featuring fast zombies. This simulation starts with a single patient zero in Milwaukee, WI. 
+Simulation of the modern, modern zombie movie, the *Dawn of the Dead* remake. This simulation starts with a single patient zero in Milwaukee, WI with a much faster, harder-to-escape zed. 
 
 ## Scenario 3 - *The Walking Dead (2010)*
 
