@@ -104,7 +104,7 @@ def consolidate_populations(county_pop_df:pd.DataFrame) -> pd.DataFrame:
 def get_states_shapefile(filepaths:Filepaths) -> gpd.GeoDataFrame:
     state_shape_filepath = os.path.join(filepaths.shape_directory,filepaths.state_shapefile_filename)
     if os.path.exists(state_shape_filepath):
-        print(f"Downloading {state_shape_filepath}")
+        print(f"Reading {state_shape_filepath}")
         state_shape_gdf = gpd.read_file(state_shape_filepath)
     else:
         print(f"Can not find {state_shape_filepath}. Generating now...")
@@ -117,7 +117,7 @@ def get_states_shapefile(filepaths:Filepaths) -> gpd.GeoDataFrame:
 def get_county_shapefile(filepaths:Filepaths) -> gpd.GeoDataFrame:
     counties_shape_filepath = os.path.join(filepaths.shape_directory,filepaths.county_shapefile_filename)
     if os.path.exists(counties_shape_filepath):
-            print(f"Downloading {counties_shape_filepath}")
+            print(f"Reading {counties_shape_filepath}")
             counties_shape_gdf = gpd.read_file(counties_shape_filepath)
     else:
         print(f"Can not find {counties_shape_filepath}. Generating now...")
@@ -137,7 +137,7 @@ def main(settings:Settings, filepaths:Filepaths) -> tuple[gpd.GeoDataFrame, pd.D
     if settings.simulation_resolution.lower() == "state": 
         state_shape_gdf = get_states_shapefile(filepaths)
         if os.path.exists(state_neighbors_filepath):  
-            print(f"Downloading {state_neighbors_filepath}")      
+            print(f"Reading {state_neighbors_filepath}")      
             state_neighbors_df = utils.df_from_json(state_neighbors_filepath)
         else:
             print(f"Can not find {state_neighbors_filepath}. Generating now...")
@@ -149,7 +149,7 @@ def main(settings:Settings, filepaths:Filepaths) -> tuple[gpd.GeoDataFrame, pd.D
     if settings.simulation_resolution.lower() == "county":        
         counties_shape_gdf = get_county_shapefile(filepaths)    
         if os.path.exists(county_neighbors_filepath):
-            print(f"Downloading {county_neighbors_filepath}")  
+            print(f"Reading {county_neighbors_filepath}")  
             county_neighbors_df = utils.df_from_json(county_neighbors_filepath)
         else:
             print(f"Can not find {county_neighbors_filepath}. Generating now...")
@@ -159,7 +159,7 @@ def main(settings:Settings, filepaths:Filepaths) -> tuple[gpd.GeoDataFrame, pd.D
         county_neighbors_df = sch.clean_df(county_neighbors_df, sch.GraphSchema)
 
     if os.path.exists(population_filepath):
-        print(f"Downloading {population_filepath}")
+        print(f"Reading {population_filepath}")
         county_population_df = pd.read_csv(population_filepath)
     else:
         print(f"Can not find {population_filepath}. Generating now...")

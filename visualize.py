@@ -9,9 +9,16 @@ from pandas import DataFrame
 import utils
 
 TIME_PROGRESSION_ERROR_MESSAGE = "TIME_PROGRESSION must be 'lin' or 'log'"
+BASE_COLORMAP = [
+    [1.0, 0.0, 0.1, 1.0],
+    [0.8, 0.8, 0.2, 1.0],
+    [0.0, 1.0, 0.1, 1.0]
+]
+FRAME = -1
+TOTAL_FRAMES = -1
 
-def generate_custom_colormap(basemap, color_slices = 5, alpha_slices = 4):    
-    arr = np.array(basemap)
+def generate_custom_colormap(color_slices = 5, alpha_slices = 4):    
+    arr = np.array(BASE_COLORMAP)
     color_step = float(arr.shape[0] - 1) / (color_slices - 1)
     alpha_step = 0.9 / (alpha_slices - 1)
     colors = []    
@@ -70,7 +77,7 @@ def setup_plots_and_limits(plot_types, geo_data, pop_data, settings):
             limits.append(get_geo_limits(geo_data))
         else:
             limits.append(get_data_limits(pop_data, "population_h_log10"))    
-    colormap = generate_custom_colormap(settings.base_colormap, settings.color_slices, settings.alpha_slices)
+    colormap = generate_custom_colormap(settings.color_slices, settings.alpha_slices)
     return(fig, axs, limits, colormap)
 
 def generate_frame(
@@ -123,7 +130,7 @@ def generate_geo_frame(
         borders:GeoDataFrame,
         colormap:ListedColormap
         ) -> None:
-    # Clear and redraw progress annotation
+    
     progress =  f"Day: {frame}"
     #Configure axes
     ax.clear()
@@ -146,7 +153,9 @@ def generate_geo_frame(
         vmin=0,
         vmax=len(colormap.colors)-1
     )
-    print(progress)
+    global FRAME
+    print(f'Rendering frame {FRAME} / {TOTAL_FRAMES}')
+    FRAME += 1
 
 def generate_line_frame(
         frame:int, 
@@ -189,6 +198,9 @@ def make_animation(geo_data:GeoDataFrame, plot_borders:GeoDataFrame, pop_data:Da
             raise ValueError(TIME_PROGRESSION_ERROR_MESSAGE)
 
     # Create the animation
+    global FRAME, TOTAL_FRAMES
+    FRAME = 1
+    TOTAL_FRAMES = len(key_frames) + 1
     mov = animation.FuncAnimation(
         fig=fig,
         func=generate_frame,        

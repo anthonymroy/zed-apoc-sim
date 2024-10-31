@@ -12,31 +12,18 @@ Hobby project of simulating a zombie apocalypse in the United States
 
 `python .\main.py`
 
-`>>run`
-### Runtime instructions
+At the `Choose Selection:` prompt, choose senerio `0` for a quick test.
+
+## Runtime instructions
 <pre>
-usage: Simulator Settings [-days [DAYS]] [-duration DURATION] [-echo] [-frame FRAME] [-fps FPS] [-help] [-image] [-load]
-                          [-region REGION [REGION ...]] [-resolution {county,state}] [-run] [-size SIZE] [-video] [-viz]
-                          [-quit]
-
-Commands
-
-options:
-  -days [DAYS]          Number of days to simulate
-  -duration DURATION    Duration of the video
-  -echo                 Echo settings to screen
-  -frame FRAME          Frames to show
-  -fps FPS              Frames per second
-  -help                 Show this help message
-  -image                Make and show image
-  -load                 Load the last simulation run
-  -region REGION [REGION ...]
-                        Region(s) where outbreak starts
-  -resolution {county,state}
-                        Resolution of 'state'(default) or 'county'
-  -run                  Run simulation and visualization
-  -size SIZE            Number of zeds to start with. Enter a number bewteen 0-1 to make the start a fraction of the existing population
-  -video                Make and save video
-  -viz                  Run visualization using previous simulation
-  -quit                 Quit the program
+Available Options:
+0. Test Run
+1. Night of the Living Dead (1968)
+2. Dawn of the Dead (2004)
+3. The Walking Dead (2010)
+Q. Quit
+Choose scenario:
   </pre>
+
+## [Scenarios](./docs/scenarios.md)
+[Details](./docs/scenarios.md) about the simulation parameters for various zombie movie scenarios.
