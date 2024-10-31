@@ -1,5 +1,4 @@
-- Make scenerios from movies [CLI REDUX]
-- Make scenerios from movies [ON DECK]
+- Make simulation parameters configurable [ON DECK]
 
 
 - Add zombie decay
@@ -19,6 +18,7 @@
 - Add variable time step
 - Add fight vs flight humans
 - Add unit tests
+- Make simulation parameters configurable
 - Make reported data configurable (after adding UI)
 - Add decorators to UI
 - Consider making a stacked bargraph that shows the human, zed, and dead populations of each state
@@ -26,7 +26,8 @@
 - Save settings with runs
 - Clean up utils.sigmoid2, simulate.calculate_escape_chance, and the learning rates in config (after unit tests)
 - Add an auto stop
-
+- Make CLI interruptable
+- Enable setting initial outbreak populations by entire regions
 
 - Add arguments [DONE]
 - Save simulations [DONE]
@@ -57,7 +58,9 @@
 - Revamp neighbor algorithm with self join [DONE]
 - Figure out if any pop can go to 0 and make it so if possible [DONE]
 - Revisit learning model and make sure initial and final rates are accurate [DONE]
- - Clean up runtime warnings [DONE]
+- Clean up runtime warnings [DONE]
+- Make scenerios from movies [DONE]
+
 
 - Enable cloud runs [STRETCH]
 - Enable parallel FEM [STRECH]

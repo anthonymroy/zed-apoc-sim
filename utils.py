@@ -1,7 +1,5 @@
 import json
 import math
-from matplotlib.colors import ListedColormap
-import numpy as np
 from pandas import DataFrame
 import shapely.geometry as sg
 
