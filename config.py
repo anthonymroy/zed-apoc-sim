@@ -83,7 +83,6 @@ class Settings:
         
     def set_scenario3(self):
         self.simulation_resolution = "county"
-        #self.outbreak_region = ["13121", "17031", "48201", "36081", "12086", "06037", "06081", "11001"]
         self.outbreak_region = ["US"]
         self.outbreak_size = 0.000102 #Number of zeds to start with. Enter a number bewteen 0-1 to make the start a fraction of the existing population
         self.initial_escape_chance_h = 0.25
