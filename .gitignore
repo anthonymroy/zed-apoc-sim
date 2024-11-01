@@ -25,10 +25,7 @@ venv.bak/
 # Video files
 *.gif
 !demo.gif
-!docs/Scenario 0.gif
-!docs/Scenario 1.gif
-!docs/Scenario 2.gif
-!docs/Scenario 3.gif
+!docs/scenario*.gif
 
 # Personal scratch file
 scratch.txt
